@@ -5,6 +5,8 @@ import axios from "axios";
 import Image from "next/image";
 import { Fragment, useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import dayjs from "dayjs";
+
 import Layout from "@/components/layout/Layout";
 const CartItems = dynamic(() => import("@/components/elements/CartItems"), {
   loading: () => <p>Loading...</p>,
@@ -15,6 +17,7 @@ export default function Checkout() {
   const { customerInfo } = useSelector((state) => state.Customer) || {};
   const [listOrdersCustomer, setListOrdersCustomer] = useState([]);
   const [listOrders, setListOrders] = useState([]);
+  const [newDate, setNewDate] = useState("");
 
   useEffect(() => {
     axios
@@ -35,6 +38,23 @@ export default function Checkout() {
   const totalSumPrice = listOrders.reduce((accumulator, order) => {
     return accumulator + order.total_price_sum;
   }, 0);
+
+  useEffect(() => {
+    if (listOrders.length > 0) {
+      // Parse the original date string using dayjs
+      const parsedDate = dayjs(
+        listOrders[listOrders.length - 1]?.date_order,
+        "YYYY-MM-DD HH:mm"
+      );
+
+      // Calculate the new date by adding 1 month
+      const availableDate = parsedDate.add(1, "month");
+
+      // Format the new date as a string and set it in the state
+      setNewDate(availableDate.format("YYYY-MM-DD HH:mm"));
+    }
+  }, [listOrders]);
+
   return (
     <Fragment>
       <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Cart">
@@ -119,6 +139,9 @@ export default function Checkout() {
                           <li>
                             Total Coins:{" "}
                             <span>{listOrders[0]?.balance} Coins.</span>{" "}
+                          </li>
+                          <li>
+                            Coins available at Date: <span>{newDate} </span>{" "}
                           </li>
                         </ul>
                       </div>

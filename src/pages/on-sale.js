@@ -29,22 +29,41 @@ export default function OnSale() {
   }, []);
   const handleFilterChange = (filters) => {
     let filtered = [...data];
-    console.log("Initial Data:", filtered);
 
     if (filters.sizes.length > 0) {
       filtered = filtered.filter((product) => {
         const productSizes = JSON.parse(product.nemuro_shoes);
         return filters.sizes.some((size) => productSizes.includes(size));
       });
-      console.log("After Size Filter:", filtered);
     }
-    console.log("Filters:", filters.category);
 
     if (filters.category.length > 0) {
       filtered = filtered.filter((product) =>
         filters.category.includes(product.category_names)
       );
-      console.log("After Category Filter:", filtered);
+    }
+    if (filters.genre.length > 0) {
+      console.log("Genre Filters:", filters.genre);
+
+      filtered = filtered.filter((product) => {
+        // Normalize genres by converting to lowercase
+        const productGenres = product.genre
+          .toLowerCase()
+          .split(",")
+          .map((g) => g.trim());
+        const filterGenres = filters.genre.map((g) => g.toLowerCase());
+
+        // Check if any of the product genres match the filter genres
+        const matches = productGenres.some((genre) =>
+          filterGenres.includes(genre)
+        );
+        console.log(
+          `Checking product ${product.id} with genres ${productGenres}: ${matches}`
+        );
+        return matches;
+      });
+
+      console.log("After Genre Filter:", filtered);
     }
 
     filtered = filtered.filter(

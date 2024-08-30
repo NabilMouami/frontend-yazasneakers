@@ -94,10 +94,19 @@ export default function HeaderSticky({
                             </span>
                           </a>
                           <ul className="header-meta__lang-submenu">
-                            <li>Logout</li>
-                            <li>Wallet: {customerInfo?.balance} Coins</li>
                             <li>
-                              <Link href="/my-orders">My-Orders</Link>
+                              <i className="fa fa-sign-out-alt text-success"></i>
+                              Logout
+                            </li>
+                            <li>
+                              {" "}
+                              <i className="fa fa-coins text-success"></i>{" "}
+                              {customerInfo?.balance} Coins
+                            </li>
+                            <li>
+                              <i className="fa fa-receipt text-success"></i>
+
+                              <Link href="/my-orders"> My-Orders</Link>
                             </li>
                           </ul>
                         </li>

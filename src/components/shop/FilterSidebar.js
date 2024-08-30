@@ -8,6 +8,7 @@ import PriceRangeSlider from "../filter/PriceRangeSlider";
 
 const FilterSidebar = ({ onFilterChange }) => {
   const [contract, setContract] = useState([]);
+  const [genre, setGenre] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [price, setPrice] = useState([0, 2000]);
 
@@ -28,11 +29,12 @@ const FilterSidebar = ({ onFilterChange }) => {
 
   const memoFilterChange = useCallback(onFilterChange, []);
   useEffect(() => {
-    memoFilterChange({ category: contract, sizes, price });
-  }, [contract, sizes, price, memoFilterChange]);
+    memoFilterChange({ category: contract, sizes, price, genre });
+  }, [genre, contract, sizes, price, memoFilterChange]);
 
   const handleCloseFilters = () => {
     setContract([]);
+    setGenre([]);
     setSizes([]);
     setPrice([0, 2000]);
   };
@@ -63,13 +65,13 @@ const FilterSidebar = ({ onFilterChange }) => {
     <div className="product-sidebar">
       <div className="product-sidebar__widget mb-30">
         <div className="product-sidebar__info product-info-list">
-          <h4 className="product-sidebar__title mb-25">Category</h4>
-          <CategoryLevel />
+          <h4 className="product-sidebar__title mb-25">Genre:</h4>
+          <CategoryLevel genre={genre} setGenre={setGenre} />
         </div>
       </div>
       <div className="product-sidebar__widget mb-30">
         <div className="product-sidebar__info product-info-list">
-          <h4 className="product-sidebar__title mb-25">Filter</h4>
+          <h4 className="product-sidebar__title mb-25">Filter Price:</h4>
           <PriceRangeSlider
             handlePriceChange={handlePriceChange}
             price={price}
@@ -79,7 +81,6 @@ const FilterSidebar = ({ onFilterChange }) => {
 
       <div className="product-sidebar__widget mb-30">
         <div className="product-sidebar__info product-info-list">
-          <h4 className="product-sidebar__title mb-25">Color</h4>
           <SizeSidebar
             toggleSizeDropdown={toggleSizeDropdown}
             isSizeDropdownOpen={isSizeDropdownOpen}

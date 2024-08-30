@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
-import { Fragment, useState, useEffect, useMemo, useCallback } from "react";
+import { Fragment, useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -19,6 +19,10 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
+const LoginModel = dynamic(() => import("@/components/sections/LoginModal"), {
+  loading: () => <p>Loading Login...</p>,
+});
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { deepOrange } from "@mui/material/colors";
 
@@ -30,9 +34,12 @@ const CartItems = dynamic(() => import("@/components/elements/CartItems"), {
 import { config_url } from "@/util/config";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import LoginModal from "@/components/sections/LoginModal";
 export default function Checkout() {
   const { cart } = useSelector((state) => state.shop) || {};
   const { customerInfo } = useSelector((state) => state.Customer) || {};
+  const [open, setOpen] = useState(false);
+
   const [productList, setProductList] = useState([]);
   console.log(productList);
   const [max_num_order, setMaxOrder] = useState([
@@ -49,6 +56,7 @@ export default function Checkout() {
   const [coinsUsed, setCoinsUsed] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [paymentType, setPaymentType] = useState("COD");
+  const [checkCoins, setCheckCoins] = useState("");
 
   const [showInputCoins, setShowInputCoins] = useState(false);
 
@@ -125,6 +133,14 @@ export default function Checkout() {
   const [alert, setAlert] = useState({ visible: false, message: "" });
 
   const [isLoginToggle, setLoginToggle] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
   const handleLoginToggle = () => setLoginToggle(!isLoginToggle);
 
   const validateStep1 = () => {
@@ -217,7 +233,8 @@ export default function Checkout() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevents the default form submission
+
     if (Object.keys(customerInfo).length === 0) {
       router.push("/sign-in");
       return;
@@ -237,7 +254,7 @@ export default function Checkout() {
           email: email,
           customer_id: customerInfo.id,
           items: productList,
-          total_price: total.toFixed(2),
+          total_price: (total - coinsUsed / 10).toFixed(2),
           payment_status: "COD",
           order_num: max_num_order[0]?.max_num_order + 1,
           coins_paid: coinsUsed,
@@ -323,8 +340,7 @@ export default function Checkout() {
                       <form>
                         <p className="form-row-first">
                           <label>
-                            Username or email{" "}
-                            <span className="required">*</span>
+                            email <span className="required">*</span>
                           </label>
                           <input type="text" />
                         </p>
@@ -338,10 +354,6 @@ export default function Checkout() {
                           <button className="tp-btn tp-color-btn" type="submit">
                             Login
                           </button>
-                          <label>
-                            <input type="checkbox" />
-                            Remember me
-                          </label>
                         </p>
                         <p className="lost-password">
                           <Link href="#">Lost your password?</Link>
@@ -353,6 +365,7 @@ export default function Checkout() {
                 </div>
               </div>
             </div>
+            <LoginModal />
           </section>
           {/* coupon-area end */}
           {/* checkout-area start */}
@@ -539,7 +552,28 @@ export default function Checkout() {
                                         control={<Radio />}
                                         label="Payer comptant à la livraison"
                                       />
+                                      <FormControlLabel
+                                        value="Payed-Online"
+                                        control={<Radio />}
+                                        label="Payer En Ligne"
+                                      />
+                                    </RadioGroup>
 
+                                    <FormLabel id="demo-radio-buttons-group-label-coins">
+                                      un choix Si Vous vloulez aussi payer par
+                                      votre Coins
+                                    </FormLabel>
+
+                                    <RadioGroup
+                                      aria-labelledby="demo-radio-buttons-group-label-coins"
+                                      defaultValue="COINS"
+                                      value={checkCoins}
+                                      onChange={(e) => {
+                                        setShowInputCoins(true);
+                                        setCheckCoins(e.target.value);
+                                      }} // Add onChange here
+                                      name="radio-buttons-coins"
+                                    >
                                       <FormControlLabel
                                         value="COINS"
                                         control={<Radio />}
@@ -583,7 +617,7 @@ export default function Checkout() {
                                       onClick={handleBack}
                                       sx={{ mt: 1, mr: 1 }}
                                     >
-                                      Back
+                                      Retour
                                     </Button>
                                   </div>
                                 </Box>
@@ -690,23 +724,20 @@ export default function Checkout() {
                                     <strong>
                                       <span className="amount">
                                         <i className="fa fa-coins text-success"></i>{" "}
-                                        Coins + {chooisePriceCoins} Coins
+                                        Coins + {chooisePriceCoins}
                                       </span>
                                     </strong>
                                   </td>
                                 </tr>
                                 <tr className="order-total">
                                   <th>
-                                    Nombre maximum de coins que vous pouvez
-                                    utiliser :
+                                    Max de coins que vous pouvez utiliser :
                                   </th>
                                   <td>
-                                    <strong>
-                                      <span className="amount">
-                                        <i className="fa fa-coins text-success"></i>{" "}
-                                        Coins + {usableCoins.toFixed(2)} Coins
-                                      </span>
-                                    </strong>
+                                    <span className="amount">
+                                      <i className="fa fa-coins text-success"></i>{" "}
+                                      Coins + {usableCoins}
+                                    </span>
                                   </td>
                                 </tr>
                                 <tr className="order-total">
@@ -721,15 +752,21 @@ export default function Checkout() {
                                   </td>
                                 </tr>
                                 <tr className="order-total">
-                                  <th>
-                                    Total Prix a vous devenerez payer lors de la
-                                    livraison:
-                                  </th>
+                                  <th>Vous Souvegardez par coins:</th>
                                   <td>
                                     <strong>
                                       <span className="amount">
-                                        {(total - coinsUsed * 2.5).toFixed(2)}{" "}
-                                        Dh{" "}
+                                        - {coinsUsed / 10} Dh
+                                      </span>
+                                    </strong>
+                                  </td>
+                                </tr>
+                                <tr className="order-total">
+                                  <th>Total Payer:</th>
+                                  <td>
+                                    <strong>
+                                      <span className="amount">
+                                        {(total - coinsUsed / 10).toFixed(2)} Dh{" "}
                                       </span>
                                     </strong>
                                   </td>
@@ -755,7 +792,7 @@ export default function Checkout() {
                             }
                             // disabled={Object.keys(customerInfo).length === 0}
                           >
-                            Place order
+                            Valider la commande
                           </button>
                         </div>
                       </div>

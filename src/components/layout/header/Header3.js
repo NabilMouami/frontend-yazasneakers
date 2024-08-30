@@ -128,10 +128,10 @@ export default function Header3({
             <div className="row align-items-center">
               <div className="col-xl-2 col-lg-3">
                 <div className="cat-menu__category p-relative">
-                  <a onClick={handleToggle} href="#">
+                  <span onClick={handleToggle}>
                     <i className="fal fa-bars" />
                     Categories
-                  </a>
+                  </span>
                   <div
                     className="category-menu"
                     style={{ display: `${isToggled ? "block" : "none"}` }}
@@ -155,33 +155,33 @@ export default function Header3({
                   </div>
                 </div>
               </div>
-              <div className="col-xl-7 col-lg-6">
+              <div className="col-xl-6 col-lg-6">
                 <div className="main-menu">
                   <nav id="mobile-menu">
                     <ul>
-                      <li className="ml-30">
+                      <li className="">
                         <Link href="/">Home</Link>
                       </li>
-                      <li className="ml-30">
+                      <li className="ml-40">
                         <Link href="/shop">Shop</Link>
                       </li>
-                      <li className="ml-30">
+                      <li className="ml-40">
                         <Link href="/cart">Cart</Link>
                       </li>
-                      <li className="ml-30">
+                      <li className="ml-40">
                         <Link href="/blog">Blog</Link>
                       </li>
-                      <li className="ml-30">
+                      <li className="ml-40">
                         <Link href="/contact">Contact</Link>
                       </li>
-                      <li className="ml-30">
+                      <li className="ml-35">
                         <Link href="/on-sale">Sale</Link>
                       </li>
                     </ul>
                   </nav>
                 </div>
               </div>
-              <div className="col-xl-3 col-lg-3">
+              <div className="col-xl-2 col-lg-2">
                 <div className="menu-contact">
                   <ul>
                     <li>

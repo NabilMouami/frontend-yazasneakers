@@ -1,8 +1,11 @@
 "use client";
+
 import { addQty, deleteCart } from "@/features/shopSlice";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { config_url } from "@/util/config";
+import { Fragment, useMemo } from "react";
+
 export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
   const { cart } = useSelector((state) => state.shop) || {};
 
@@ -14,15 +17,19 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
   };
 
   // qty handler
-  let total = 0;
+  const total = useMemo(() => {
+    let sum = 0;
 
-  cart?.forEach((data) => {
-    const price =
-      data.item.price_promo !== 0 ? data.item.price_promo : data.item.price;
-    total += price;
-  });
+    cart?.forEach((data) => {
+      const price =
+        data.item.price_promo !== 0 ? data.item.price_promo : data.item.price;
+      sum += price;
+    });
+    return sum;
+  }, [cart]);
+
   return (
-    <>
+    <Fragment>
       <div
         className={`tpcartinfo tp-cart-info-area p-relative ${
           isCartSidebar ? "tp-sidebar-opened" : ""
@@ -32,7 +39,7 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
           <i className="fal fa-times" />
         </button>
         <div className="tpcart">
-          <h4 className="tpcart__title">Your Cart</h4>
+          <h4 className="tpcart__title">Votre Panier</h4>
           <div className="tpcart__product">
             <div className="tpcart__product-list">
               <ul>
@@ -48,18 +55,21 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                           className="tpcart__del"
                           onClick={() => deleteCartHandler(data.item?.id)}
                         >
-                          <Link href="#">
+                          <button>
                             <i className="far fa-times-circle" />
-                          </Link>
+                          </button>
                         </div>
                       </div>
                       <div className="tpcart__content">
                         <span className="tpcart__content-title">
-                          <Link href="/shop-details">{data.item.title}</Link>
+                          <Link href="/shop-details">{data.item.name}</Link>
                         </span>
                         <div className="tpcart__cart-price">
                           <span className="new-price">
-                            Dh {data.item?.price}
+                            {data.item.price_promo !== 0
+                              ? data.item.price_promo
+                              : data.item.price}{" "}
+                            Dh
                           </span>
                         </div>
                       </div>
@@ -85,7 +95,7 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
           </div>
           <div className="tpcart__free-shipping text-center">
             <span>
-              Free shipping for orders <b>under 10km</b>
+              Livraison gratuite pour les commandes <b>supérieures à 1000Dh</b>
             </span>
           </div>
         </div>
@@ -94,6 +104,6 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
         className={`cartbody-overlay ${isCartSidebar ? "opened" : ""}`}
         onClick={handleCartSidebar}
       />
-    </>
+    </Fragment>
   );
 }
