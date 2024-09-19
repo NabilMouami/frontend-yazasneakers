@@ -77,7 +77,7 @@ export default function MobileMenu() {
                 >
                   {categoryList?.map((item) => (
                     <li key={item.id}>
-                      <Link href={`/produit/${item.name}`}>
+                      <Link href={`/collections/${item.name}`}>
                         <span>{item.name}</span>
                       </Link>
                     </li>
@@ -93,7 +93,7 @@ export default function MobileMenu() {
                 </Link>
               </li>
               <li>
-                <Link href="/sale">Sales</Link>
+                <Link href="/on-sale">Sales</Link>
               </li>
               <li className="has-dropdown">
                 <Link href="/blog">Blog</Link>

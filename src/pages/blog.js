@@ -40,7 +40,12 @@ export default function Blog() {
             <div className="row">
               <div className="col-xxl-8 col-xl-8 col-lg-7 col-md-12">
                 <div className="postbox pr-20 pb-50">
-                  <BlogPost showItem={6} style={1} showPagination />
+                  <BlogPost
+                    blogs={blogs}
+                    showItem={6}
+                    style={1}
+                    showPagination
+                  />
                 </div>
               </div>
               <div className="col-xxl-4 col-xl-4 col-lg-5 col-md-12">
@@ -61,14 +66,18 @@ export default function Blog() {
                     </div>
                   </div>
                   <div className="sidebar__widget mb-40">
-                    <h3 className="sidebar__widget-title mb-25">Category</h3>
+                    <h3 className="sidebar__widget-title mb-25">Collections</h3>
                     <div className="sidebar__widget-content">
                       <ul>
-                        <li>
-                          <Link href="/blog-details">
-                            Chemistry<span>03</span>
-                          </Link>
-                        </li>
+                        {blogs.map((item) => (
+                          <li>
+                            <Link href="/blog-details">
+                              {item.name}
+                              <span>03</span>
+                            </Link>
+                          </li>
+                        ))}
+
                         <li>
                           <Link href="/blog-details">
                             Forensic science <span>07</span>

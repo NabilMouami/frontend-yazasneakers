@@ -43,7 +43,7 @@ const WishlistItems = () => {
         return (
           <tr className="cart-item" key={data.item.id}>
             <td className="product-thumbnail">
-              <Link href={`/shop/${data.item.id}`}>
+              <Link href={`/produits/${data.item.name_by_filtered}`}>
                 <img
                   src={`${config_url}/images/${data.item.image}`}
                   alt="cart added product"
@@ -52,7 +52,9 @@ const WishlistItems = () => {
             </td>
 
             <td className="product-name">
-              <Link href={`/shop/${data.item.id}`}>{data.item.name}</Link>
+              <Link href={`/produits/${data.item.name_by_filtered}`}>
+                {data.item.name}
+              </Link>
             </td>
             <td className="product-name">
               <button

@@ -38,10 +38,12 @@ export const shopSlice = createSlice({
       localStorage.setItem("local-cart", JSON.stringify(state.cart));
     },
     deleteCart: (state, { payload }) => {
-      console.log(payload);
-      state.cart = state.cart.filter((data) => data.item.id !== payload);
+      const { id, size } = payload;
+      state.cart = state.cart.filter(
+        (data) => !(data.item.id === id && data.size === size)
+      );
       localStorage.setItem("local-cart", JSON.stringify(state.cart));
-      toast.error(`Item ${payload} has been deleted.`);
+      toast.error(`Item ${id} with size ${size} has been deleted.`);
     },
     addQty: (state, { payload }) => {
       state.cart = state.cart.filter((item) => {

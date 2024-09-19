@@ -2,15 +2,24 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import CartShow from "../elements/CartShow";
 import WishListShow from "../elements/WishListShow";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "@/features/customerSlice";
 export default function HeaderSticky({
   scroll,
   isCartSidebar,
   handleCartSidebar,
 }) {
   const { customerInfo } = useSelector((state) => state.Customer) || {};
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const Logout = async () => {
+    await localStorage.removeItem("token");
+    await dispatch(logout());
+    await router.push("/");
+  };
 
   return (
     <>
@@ -20,7 +29,7 @@ export default function HeaderSticky({
           scroll ? "header-sticky" : ""
         }`}
       >
-        <div className="container">
+        <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-xl-2 col-lg-3">
               <div className="logo">
@@ -35,26 +44,27 @@ export default function HeaderSticky({
               </div>
             </div>
             <div className="col-xl-7 col-lg-6">
-              <div className="main-menu">
+              <div className="main-menu ml-40">
                 <nav>
                   <ul>
-                    <li className="ml-30">
-                      <Link href="/">Home</Link>
+                    <li className="ml-40">
+                      <Link href="/new">New</Link>
                     </li>
-                    <li className="ml-30">
-                      <Link href="/shop">Shop</Link>
+                    <li className="ml-40">
+                      <Link href="/collections/sneakers">Sneakers</Link>
                     </li>
-                    <li className="ml-30">
-                      <Link href="/cart">Cart</Link>
+                    <li className="ml-40">
+                      <Link href="/collections/accessoire">Accessoires</Link>
                     </li>
-                    <li className="ml-30">
+                    <li className="ml-40">
+                      <Link href="/on-sale">Sale</Link>
+                    </li>
+
+                    <li className="ml-40">
                       <Link href="/blog">Blog</Link>
                     </li>
-                    <li className="ml-30">
-                      <Link href="/contact">Contact</Link>
-                    </li>
-                    <li className="ml-30">
-                      <Link href="/on-sale">Sale</Link>
+                    <li className="ml-40">
+                      <Link href="/cart">Cart</Link>
                     </li>
                   </ul>
                 </nav>
@@ -62,7 +72,7 @@ export default function HeaderSticky({
             </div>
             <div className="col-xl-3 col-lg-3">
               <div className="header-meta-info d-flex align-items-center justify-content-end">
-                <div className="header-meta__social  d-flex align-items-center">
+                <div className="header-meta__social  d-flex align-items-center gap-2 mr-20">
                   <button
                     className="header-cart p-relative tp-cart-toggle"
                     onClick={handleCartSidebar}
@@ -94,19 +104,28 @@ export default function HeaderSticky({
                             </span>
                           </a>
                           <ul className="header-meta__lang-submenu">
-                            <li>
+                            <li onClick={() => Logout()}>
                               <i className="fa fa-sign-out-alt text-success"></i>
                               Logout
                             </li>
                             <li>
                               {" "}
-                              <i className="fa fa-coins text-success"></i>{" "}
+                              <img
+                                width="20"
+                                height="20"
+                                src="/assets/img/logo/coins.png"
+                              />{" "}
                               {customerInfo?.balance} Coins
                             </li>
                             <li>
                               <i className="fa fa-receipt text-success"></i>
 
                               <Link href="/my-orders"> My-Orders</Link>
+                            </li>
+                            <li>
+                              <i className="fal fa-user" />
+
+                              <Link href="/my-account"> My-Account</Link>
                             </li>
                           </ul>
                         </li>

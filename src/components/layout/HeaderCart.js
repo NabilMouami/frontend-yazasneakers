@@ -12,8 +12,8 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
   const dispatch = useDispatch();
 
   // delete cart item
-  const deleteCartHandler = (id) => {
-    dispatch(deleteCart(id));
+  const deleteCartHandler = (id, size) => {
+    dispatch(deleteCart({ id, size }));
   };
 
   // qty handler
@@ -53,7 +53,9 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                         />
                         <div
                           className="tpcart__del"
-                          onClick={() => deleteCartHandler(data.item?.id)}
+                          onClick={() =>
+                            deleteCartHandler(data.item?.id, data.size)
+                          }
                         >
                           <button>
                             <i className="far fa-times-circle" />
@@ -85,10 +87,10 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
               </div>
               <div className="tpcart__checkout-btn">
                 <Link className="tpcart-btn mb-10" href="/cart">
-                  View Cart
+                  Voir le panier{" "}
                 </Link>
                 <Link className="tpcheck-btn" href="/checkout">
-                  Checkout
+                  Commander
                 </Link>
               </div>
             </div>

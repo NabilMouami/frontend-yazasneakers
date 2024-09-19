@@ -135,7 +135,13 @@ export default function Footer1() {
                       <i className="far fa-phone" />
                     </div>
                     <div className="footer-cta__text">
-                      <Link href="/tel:0626309597"> +212 626 30 9597</Link>
+                      <Link
+                        href="https://wa.me/212626309597"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        +212 626 30 9597
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -148,8 +154,9 @@ export default function Footer1() {
                 <div className="col-xl-6 col-lg-7 col-md-5 col-sm-12">
                   <div className="footer-copyright__content">
                     <span>
-                      Copyright {new Date().getFullYear()}{" "}
-                      <Link href="/">©YazaSneakers</Link>. All rights reserved.
+                      Copyright {new Date().getFullYear()}
+                      <span className="fw-bold text-black"> ©YazaSneakers</span>
+                      . All rights reserved.
                     </span>
                   </div>
                 </div>

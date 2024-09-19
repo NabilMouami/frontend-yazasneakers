@@ -1,14 +1,17 @@
 "use client";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import CartShow from "@/components/elements/CartShow";
 import WishListShow from "@/components/elements/WishListShow";
 import Link from "next/link";
 import Image from "next/image";
-import { useSelector } from "react-redux";
+import axios from "axios";
 import { config_url } from "@/util/config";
-import { useState } from "react";
 import HeaderMobSticky from "../HeaderMobSticky";
 import HeaderSticky from "../HeaderSticky";
 import HeaderTabSticky from "../HeaderTabSticky";
+import { loadAllCategories } from "@/features/categorySlice";
+import { searchProducts } from "@/features/productsSlice";
 
 export default function Header3({
   scroll,
@@ -17,10 +20,30 @@ export default function Header3({
   isCartSidebar,
   handleCartSidebar,
 }) {
-  const { categoryList } = useSelector((state) => state.Categories) || {};
+  const filteredProducts = useSelector(
+    (state) => state.Products.filteredProducts
+  );
+
+  const [allCollections, setAllCollections] = useState([]);
+  const [query, setQuery] = useState("");
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   const [isToggled, setToggled] = useState(false);
   const handleToggle = () => setToggled(!isToggled);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    axios.get(`${config_url}/api/collections`).then(async (res) => {
+      await dispatch(loadAllCategories(res.data));
+      await setAllCollections(res.data);
+    });
+  }, []);
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    setDropdownVisible(!!value);
+    dispatch(searchProducts(value));
+  };
   return (
     <>
       <header>
@@ -30,12 +53,11 @@ export default function Header3({
               <div className="col-xl-7 col-lg-12 col-md-12 ">
                 <div className="header-welcome-text">
                   <span>
-                    Welcome to our international shop! Enjoy free shipping on
-                    orders.
+                    Bienvenue dans notre boutique Yazasneakrz! Profitez de la
+                    livraison gratuite sur vos commandes.
                   </span>
                   <Link href="/shop">
-                    Shop Now
-                    <i className="fal fa-long-arrow-right" />
+                    Achetez maintenant <i className="fal fa-long-arrow-right" />
                   </Link>
                 </div>
               </div>
@@ -46,10 +68,6 @@ export default function Header3({
                       <li>
                         <Link href="/sign-in">
                           <i className="fal fa-user" /> Account
-                        </Link>
-                        <Link className="order-tick" href="/tracking">
-                          <i className="fal fa-plane-departure" />
-                          Track Your Order
                         </Link>
                       </li>
                     </ul>
@@ -70,8 +88,9 @@ export default function Header3({
             </div>
           </div>
         </div>
+
         <div className="logo-area green-logo-area mt-30 d-none d-xl-block">
-          <div className="container">
+          <div className="container-fluid">
             <div className="row align-items-center">
               <div className="col-xl-2 col-lg-3">
                 <div className="logo">
@@ -83,8 +102,9 @@ export default function Header3({
                       width={100}
                     />
                   </Link>
-                </div>
+                </div>{" "}
               </div>
+
               <div className="col-xl-10 col-lg-9">
                 <div className="header-meta-info d-flex align-items-center justify-content-between">
                   <div className="header-search-bar">
@@ -93,12 +113,77 @@ export default function Header3({
                         <button className="header-search-icon">
                           <i className="fal fa-search" />
                         </button>
-                        <input type="text" placeholder="Search products..." />
+                        <input
+                          type="text"
+                          value={query}
+                          onChange={handleSearch}
+                          placeholder="Search products..."
+                        />
                       </div>
                     </form>
+                    <div style={{ zIndex: 9999 }} className="position-relative">
+                      {isDropdownVisible && (
+                        <div className="position-absolute bg-white w-100 mt-2 shadow-lg border rounded">
+                          <div className="p-2 text-muted">PRODUCTS</div>
+                          {filteredProducts.length > 0 ? (
+                            <div className="border-top border-bottom">
+                              {filteredProducts.map((product) => (
+                                <div
+                                  key={product.id}
+                                  className="d-flex align-items-center p-2 hover-bg-light"
+                                >
+                                  <Image
+                                    width={50}
+                                    height={50}
+                                    src={`${config_url}/images/${product?.image}`}
+                                    alt={product.meta_image}
+                                    className="w-10 h-10 object-cover me-3"
+                                  />
+                                  <div>
+                                    <div className="fw-semibold">
+                                      <Link
+                                        href={`/produits/${product?.name_by_filtered}`}
+                                      >
+                                        {product.name}
+                                      </Link>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-2 text-muted">
+                              No products found
+                            </div>
+                          )}
+                          {query && (
+                            <div className="p-2 text-primary cursor-pointer hover-underline">
+                              Search for "{query}"
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="header-meta header-brand d-flex align-items-center">
-                    <div className="header-meta__social d-flex align-items-center ml-25">
+                  <ul className="cat-menu__list d-flex align-items-center">
+                    <li>
+                      <Link className="fw-bolder" href="/genre/homme">
+                        Homme
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="fw-bolder" href="/genre/femme">
+                        Femme
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="fw-bolder" href="/genre/enfant">
+                        Enfants
+                      </Link>
+                    </li>
+                  </ul>
+                  <div className="header-meta header-brand d-flex align-items-center mr-20">
+                    <div className="header-meta__social d-flex align-items-center gap-2">
                       <button
                         className="header-cart p-relative tp-cart-toggle"
                         onClick={handleCartSidebar}
@@ -123,23 +208,23 @@ export default function Header3({
             </div>
           </div>
         </div>
-        <div className="main-menu-area tertiary-main-menu mt-25 d-none d-xl-block">
-          <div className="container">
+        <div className="main-menu-area tertiary-main-menu mt-40 d-none d-xl-block ml-40 mr-40 mb-5">
+          <div className="container-fluid">
             <div className="row align-items-center">
-              <div className="col-xl-2 col-lg-3">
+              <div className="col-xl-2 col-lg-3 mt-10">
                 <div className="cat-menu__category p-relative">
                   <span onClick={handleToggle}>
                     <i className="fal fa-bars" />
-                    Categories
+                    Collections
                   </span>
                   <div
                     className="category-menu"
                     style={{ display: `${isToggled ? "block" : "none"}` }}
                   >
                     <ul className="cat-menu__list">
-                      {categoryList?.map((item) => (
+                      {allCollections?.map((item) => (
                         <li key={item.id}>
-                          <Link href={`/produit/${item.name}`}>
+                          <Link href={`/collections/${item.name}`}>
                             <Image
                               src={`${config_url}/categories/${item.image}`}
                               alt={item.meta_image}
@@ -155,27 +240,28 @@ export default function Header3({
                   </div>
                 </div>
               </div>
-              <div className="col-xl-6 col-lg-6">
+              <div className="col-xl-8 col-lg-8">
                 <div className="main-menu">
                   <nav id="mobile-menu">
                     <ul>
-                      <li className="">
-                        <Link href="/">Home</Link>
+                      <li className="ml-60">
+                        <Link href="/new">New</Link>
                       </li>
-                      <li className="ml-40">
-                        <Link href="/shop">Shop</Link>
+                      <li className="ml-60">
+                        <Link href="/collections/sneakers">Sneakers</Link>
                       </li>
-                      <li className="ml-40">
-                        <Link href="/cart">Cart</Link>
+                      <li className="ml-60">
+                        <Link href="/collections/accessoire">Accessoires</Link>
                       </li>
-                      <li className="ml-40">
+                      <li className="ml-60">
+                        <Link href="/on-sale">Sale</Link>
+                      </li>
+                      <li className="ml-60">
                         <Link href="/blog">Blog</Link>
                       </li>
-                      <li className="ml-40">
-                        <Link href="/contact">Contact</Link>
-                      </li>
-                      <li className="ml-35">
-                        <Link href="/on-sale">Sale</Link>
+
+                      <li className="ml-60">
+                        <Link href="/cart">Cart</Link>
                       </li>
                     </ul>
                   </nav>
@@ -190,7 +276,13 @@ export default function Header3({
                           <i className="fal fa-phone" />
                         </div>
                         <div className="menu-contact__info">
-                          <Link href="/tel:0123456">+212 626 30 9597</Link>
+                          <Link
+                            href="https://wa.me/212626309597"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            +212 626 30 9597
+                          </Link>
                         </div>
                       </div>
                     </li>

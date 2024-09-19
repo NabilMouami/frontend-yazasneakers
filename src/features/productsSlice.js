@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   productList: [],
+  filteredProducts: [], // filtered results
+
   Col: {},
   Details: {},
 };
@@ -17,10 +19,16 @@ const productsSlice = createSlice({
       console.log(action.payload);
       state.Details = action.payload;
     },
+    searchProducts: (state, action) => {
+      state.filteredProducts = state.productList.filter((product) =>
+        product.name.toLowerCase().includes(action.payload.toLowerCase())
+      );
+    },
   },
 });
 
-export const { loadAllProducts, loadDetailsProduct } = productsSlice.actions;
+export const { loadAllProducts, loadDetailsProduct, searchProducts } =
+  productsSlice.actions;
 
 export const productList = (state) => state.Products.productList;
 export const Details = (state) => state.Products.Details;

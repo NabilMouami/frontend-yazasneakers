@@ -1178,7 +1178,7 @@ input[type="color"] {
 }
 
 .header-search-bar {
-  width: 100%;
+  width: 40%;
 }
 
 .header-search-bar .header-search-icon {
@@ -1311,7 +1311,7 @@ input[type="color"] {
 }
 
 .header-meta__social a {
-  margin-left: 25px;
+  margin-left: 8px;
   font-size: 20px;
 }
 
@@ -3071,7 +3071,20 @@ a.add-to-cart {
   border-radius: 5px;
   z-index: 2;
 }
-
+.tpproduct__thumb-release {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 7px;
+  background-color: #00712d;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--tp-common-white);
+  line-height: 1;
+  padding: 8px 15px;
+  z-index: 2;
+}
 .tpproduct__thumb-action {
   position: absolute;
   right: 0;
@@ -4267,14 +4280,25 @@ a.add-to-cart {
 
 .bannertext {
   position: absolute;
-  top: 50%;
+  bottom: 4%;
   left: 0;
   right: 0;
   text-align: center;
   z-index: 9;
   transform: translateY(-50%);
 }
-
+.bannertext .text-button {
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 0px;
+  padding: 10px 15px;
+}
+.bannertext .text-button1 {
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 0px;
+  padding: 10px 15px;
+}
 .bannertext__subtitle {
   font-size: 16px;
   color: var(--tp-common-white);
@@ -4532,7 +4556,171 @@ a.add-to-cart {
   border-color: #007bff; /* Example focus border color */
   outline: none; /* Remove default focus outline */
 }
+.image-container {
+  overflow: hidden; /* Ensures that the scaled image does not overflow its container */
+  position: relative; /* Positioning context for the image */
+}
 
+.zoom-image {
+  transition: transform 0.3s ease; /* Smooth transition effect */
+  width: 100%; /* Ensures the image fills the container initially */
+  height: 100%; /* Ensures the image fills the container initially */
+  object-fit: cover; /* Ensures the image covers the container while maintaining aspect ratio */
+}
+
+.zoom-image:hover {
+  transform: scale(1.1); /* Scales the image to 120% of its original size */
+}
+.bannerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  background-color: #f5f5f5;
+  height: 100vh; /* Adjust the container height */
+}
+.bannerContainer1 {
+  position: relative;
+  width: 100%; /* Ensure the container takes the full viewport width */
+  height: 500px;
+}
+.bannerContainer1 img {
+  transition: transform 0.3s ease; /* Smooth transition effect */
+  position: absolute; /* Position the image absolutely within the container */
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+}
+.bannerContainer1 img:hover {
+  transform: scale(0.97); /* Scales the image to 120% of its original size */
+}
+.full-width-image {
+  width: 100%; /* Make the image take the full width of its container */
+  height: auto; /* Maintain the aspect ratio */
+  object-fit: cover; /* Ensure the image covers the container without stretching */
+  object-position: center;
+}
+.bannerContainer img {
+  max-width: 100%;
+  height: auto;
+}
+
+.bannerContainer2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  background-color: #f5f5f5;
+  width: 100%; /* Ensure the container takes the full viewport width */
+  height: 400px;
+}
+.bannerContainer2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+}
+.grid-container-ban {
+  height: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.grid-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 10%;
+  left: 40%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.jackets {
+  grid-column: span 1;
+  width: 100%;
+  height: 700px;
+}
+.jackets img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+}
+.newsletter {
+  height: 344px;
+  width: 100%;
+}
+.newsletter img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+}
+.stanley {
+  height: 344px;
+  width: 100%;
+}
+.stanley img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+}
+.meta-description-category {
+  color: white;
+
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  justify-content: center;
+  height: 50vh;
+}
+.brand-description-meta {
+  background-color: #2a2a2a; /* Dark background */
+  color: white;
+
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.brand-image-category img {
+  height: 50vh;
+  width: 100%;
+}
+.custom-hover-btn {
+  background-color: white !important; /* Initial background color */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.custom-hover-btn:hover {
+  background-color: #ff9100 !important; /* Change to green on hover */
+}
 /*----------------------------------------*/
 /*  00. 10. PORTFOLIO CSS START
 /*----------------------------------------*/
@@ -4545,6 +4733,36 @@ a.add-to-cart {
 }
 
 @media (max-width: 767px) {
+  .bannerContainer2 {
+    height: 300px;
+  }
+  .bannerContainer1 {
+    height: 350px;
+  }
+
+  .overlay {
+    left: 35%;
+    padding: 5px;
+    font-size: 10px;
+  }
+
+  .jackets {
+    height: 350px;
+  }
+
+  .newsletter {
+    height: 170px;
+    width: 100%;
+  }
+
+  .stanley {
+    height: 170px;
+    width: 100%;
+  }
+
+  .meta-description-category {
+    margin-bottom: 100%;
+  }
   .blog-btn {
     font-size: 14px;
   }
@@ -6356,6 +6574,7 @@ a.add-to-cart {
 }
 
 .tpproduct-details__pera p {
+  width: 80%;
   font-size: 16px;
   color: var(--tp-text-secondary);
   margin-bottom: 23px;
@@ -6523,7 +6742,7 @@ a.add-to-cart {
 }
 
 .tpproduct-details__condation {
-  margin-left: -60px;
+  margin-left: -40px;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 991px) {

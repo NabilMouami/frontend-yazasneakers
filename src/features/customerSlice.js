@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   customerInfo: {},
 };
+
 const customerSlice = createSlice({
   initialState,
   name: "customerInfo",
@@ -11,11 +12,14 @@ const customerSlice = createSlice({
       console.log(action.payload);
       state.customerInfo = action.payload;
     },
+    logout: (state) => {
+      state.customerInfo = {};
+    },
   },
 });
 
-export const { loadCustomer } = customerSlice.actions;
+export const { loadCustomer, logout } = customerSlice.actions;
 
-export const customerInfo = (state) => state.Customer.customerInfo;
+export const customerInfo = (state) => state.customerInfo;
 
 export default customerSlice.reducer;

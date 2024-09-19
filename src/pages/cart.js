@@ -24,76 +24,74 @@ export default function Cart() {
           <div className="container">
             <div className="row">
               <div className="col-12">
-                <form>
-                  <div className="table-content table-responsive">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th className="product-thumbnail">Image</th>
-                          <th className="cart-product-name">Produit Nom</th>
-                          <th className="cart-product-name">Size</th>
-                          <th className="product-price">Prix ​​unitaire</th>
-                          <th className="product-remove">Retirer</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <CartItems />
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="coupon-all">
-                        <div className="coupon">
-                          <input
-                            id="coupon_code"
-                            className="input-text"
-                            name="coupon_code"
-                            placeholder="Coupon code"
-                            type="text"
-                          />
-                          <button
-                            className="tp-btn tp-color-btn banner-animation"
-                            name="apply_coupon"
-                            type="submit"
-                          >
-                            Apply Coupon
-                          </button>
-                        </div>
-                        <div className="coupon2">
-                          <button
-                            className="tp-btn tp-color-btn banner-animation"
-                            name="update_cart"
-                            type="submit"
-                          >
-                            Update cart
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row justify-content-end">
-                    <div className="col-md-5 ">
-                      <div className="cart-page-total">
-                        <h2>Cart totals</h2>
-                        <ul className="mb-20">
-                          <li>
-                            Subtotal <span>{total.toFixed(2)} Dh</span>
-                          </li>
-                          <li>
-                            Total <span>{total.toFixed(2)} Dh</span>
-                          </li>
-                        </ul>
-                        <Link
-                          href="/checkout"
+                <div className="table-content table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th className="product-thumbnail">Image</th>
+                        <th className="cart-product-name">Produit Nom</th>
+                        <th className="cart-product-name">Pointure</th>
+                        <th className="product-price">Prix ​​unitaire</th>
+                        <th className="product-remove">Retirer</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <CartItems />
+                    </tbody>
+                  </table>
+                </div>
+                <div className="row">
+                  <div className="col-12">
+                    <div className="coupon-all">
+                      <div className="coupon">
+                        <input
+                          id="coupon_code"
+                          className="input-text"
+                          name="coupon_code"
+                          placeholder="Coupon code"
+                          type="text"
+                        />
+                        <button
                           className="tp-btn tp-color-btn banner-animation"
+                          name="apply_coupon"
+                          type="submit"
                         >
-                          Proceed to Checkout
-                        </Link>
+                          Apply Coupon
+                        </button>
+                      </div>
+                      <div className="coupon2">
+                        <button
+                          className="tp-btn tp-color-btn banner-animation"
+                          name="update_cart"
+                          type="submit"
+                        >
+                          Update cart
+                        </button>
                       </div>
                     </div>
                   </div>
-                </form>
+                </div>
+                <div className="row justify-content-end">
+                  <div className="col-md-5 ">
+                    <div className="cart-page-total">
+                      <h2>Cart totals</h2>
+                      <ul className="mb-20">
+                        <li>
+                          Subtotal <span>{total.toFixed(2)} Dh</span>
+                        </li>
+                        <li>
+                          Total <span>{total.toFixed(2)} Dh</span>
+                        </li>
+                      </ul>
+                      <Link
+                        href="/checkout"
+                        className="tp-btn tp-color-btn banner-animation"
+                      >
+                        Proceed to Checkout
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

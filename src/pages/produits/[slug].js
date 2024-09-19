@@ -1,10 +1,11 @@
 "use client";
+import Head from "next/head";
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 
-import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addCartWithSize } from "@/features/shopSlice";
 import { addWishlistWithSize } from "@/features/wishlistSlice";
@@ -55,7 +56,7 @@ const swiperOptions = {
     prevEl: ".tprelated__prv",
   },
 };
-export default function ShopDetails() {
+function DetailsProduct({ initialData, nameByFiltered }) {
   const { productList } = useSelector((state) => state.Products) || {};
   const { Details } = useSelector((state) => state.Products) || {};
   const [productSimilaire, setProductSimilaire] = useState([]);
@@ -67,36 +68,17 @@ export default function ShopDetails() {
   console.log(listProdsGroup);
 
   const [loading, setLoading] = useState(true);
-  const [product, setProduct] = useState({});
+  const [product, setProduct] = useState(initialData || {});
   const [category, setCategory] = useState("");
   console.log(category);
   const dispatch = useDispatch();
-  const abc = useParams();
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("useParams:", abc);
-    const id = abc.id;
-
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(
-          `${config_url}/api/interface/products/${parseInt(id)}`
-        );
-        console.log("API Response:", response.data);
-
-        const productData = response?.data[0];
-        console.log("Product Data:", productData);
-
-        setProduct(productData);
-        dispatch(loadDetailsProduct(productData)); // Dispatch the action
-      } catch (error) {
-        console.error("Failed to fetch product:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [abc, dispatch]);
+    if (product) {
+      dispatch(loadDetailsProduct(product)); // Dispatch the action
+    }
+  }, [product, dispatch]);
 
   useEffect(() => {
     if (product.id) {
@@ -120,6 +102,7 @@ export default function ShopDetails() {
       setCategory(Details.category); // Update category when Details.category changes
     }
   }, [Details]);
+
   useEffect(() => {
     if (category && productList?.length > 0) {
       const filtered = productList.filter(
@@ -128,6 +111,14 @@ export default function ShopDetails() {
       setProductSimilaire(filtered);
     }
   }, [category, productList]);
+
+  const handleLinkClick = (e, item) => {
+    e.preventDefault();
+    router
+      .push(`/produits/${item.name_by_filtered}`)
+      .then(() => router.reload());
+  };
+
   const handleSelectedSize = (size) => {
     setSelectedSize(size);
     setSelected(false);
@@ -229,7 +220,7 @@ export default function ShopDetails() {
             <div className="container">
               <div className="row">
                 <div className="col-lg-5 col-md-12">
-                  <div className="tpproduct-details__nab pr-50 mb-40">
+                  <div className="tpproduct-details__nab pr-60 mb-40">
                     <ReactImageGallery
                       showFullscreenButton={false}
                       showPlayButton={false}
@@ -254,14 +245,8 @@ export default function ShopDetails() {
                         )}
                       </span>
                     </div>
-                    <div
-                      className="mb-2 p-2 d-flex flex-column gap-2 me-2"
-                      style={{ width: "90%" }}
-                    >
-                      <div className="small font-weight-bold">Tailles</div>
-                      <div className="row row-cols-1 row-cols-md-1 row-cols-lg-4 g-2">
-                        {renderButtons(myArray)}
-                      </div>
+                    <div className="tpproduct-details__pera">
+                      <p>{Details.description}</p>
                     </div>
                     <div className="tpproduct-details__price mb-30 d-flex gap-2 justify-center">
                       {Details.price_promo === 0 ? (
@@ -275,20 +260,80 @@ export default function ShopDetails() {
                         <del className="ml-4">{Details.price}Dh</del>
                       )}
                     </div>
-                    <div className="d-flex flex-column justify-content-center align-items-start gap-4">
-                      <div>
-                        {Details.price_promo === 0 ? (
-                          <span>
-                            <i className="fa fa-coins text-success"></i> Coins +{" "}
-                            {Details.price / 2.5} Coins
-                          </span>
-                        ) : (
-                          <span>
-                            <i className="fa fa-coins text-success"></i> Coins +{" "}
-                            {Details.price_promo / 2.5} Coins
-                          </span>
-                        )}
+                    <div>
+                      {Details.price_promo === 0 ? (
+                        <span>
+                          <img
+                            width="20"
+                            height="20"
+                            src="/assets/img/logo/coins.png"
+                            className="mr-10"
+                            alt="icon-coins"
+                          />{" "}
+                          Coins + {Details.price / 2.5} Coins
+                        </span>
+                      ) : (
+                        <span>
+                          <img
+                            width="20"
+                            height="20"
+                            src="/assets/img/logo/coins.png"
+                            className="mr-10"
+                            alt="icon-coins"
+                          />{" "}
+                          Coins + {Details.price_promo / 2.5} Coins
+                        </span>
+                      )}
+                    </div>
+                    {listProdsGroup && listProdsGroup.length > 0 && (
+                      <h3>Related Product:</h3>
+                    )}
+
+                    <div className="w-90 d-flex flex-row align-items-center">
+                      {listProdsGroup?.map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => setSelectedProduct(product.id)}
+                        >
+                          <div
+                            className={`border w-100 ${
+                              selectedProduct === product.id
+                                ? "border-dark"
+                                : "border-0"
+                            } rounded p-1`}
+                          >
+                            <Link
+                              href={`/produits/${product.name_by_filtered}`}
+                              onClick={(e) => handleLinkClick(e, item)}
+                            >
+                              <img
+                                width="80"
+                                height="80"
+                                src={`${config_url}/images/${product.image}`}
+                                alt={product.meta_image}
+                                className="rounded"
+                                layout="responsive"
+                                objectFit="contain" // or "cover" based on your preference
+                              />
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      className="mb-2 p-2 d-flex flex-column gap-2 me-2"
+                      style={{ width: "90%" }}
+                    >
+                      <div className="small font-weight-bold">
+                        Sélectionnez la taille:
                       </div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {renderButtons(myArray)}
+                      </div>
+                    </div>
+
+                    <div className="d-flex flex-column justify-content-center align-items-start gap-4">
                       <div className="tpproduct-details__count d-flex flex-column justify-content-center align-items-start gap-4 mb-25">
                         <div className="tpproduct-details__cart ml-10">
                           <button
@@ -318,45 +363,12 @@ export default function ShopDetails() {
                     </div>
 
                     <div className="tpproduct-details__information tpproduct-details__categories">
-                      <p>Categories:</p>
+                      <p>Categorie(s):</p>
                       <span>{Details.category_names}</span>
                     </div>
                     <div className="tpproduct-details__information tpproduct-details__tags">
                       <p>Tags:</p>
                       <span>{Details.genre}</span>
-                    </div>
-                    {listProdsGroup && listProdsGroup.length > 0 && (
-                      <h3>Related Product:</h3>
-                    )}
-
-                    <div className="w-100 d-flex gap-2">
-                      {listProdsGroup?.map((product) => (
-                        <div
-                          key={product.id}
-                          onClick={() => setSelectedProduct(product.id)}
-                        >
-                          <div
-                            className={`border w-50 ${
-                              selectedProduct === product.id
-                                ? "border-dark"
-                                : "border-0"
-                            } rounded p-4`}
-                            onClick={() =>
-                              dispatch(loadDetailsProduct(product))
-                            }
-                          >
-                            <Image
-                              width={50}
-                              height={50}
-                              src={`${config_url}/images/${product.image}`}
-                              alt={product.meta_image}
-                              className="rounded"
-                              layout="responsive"
-                              objectFit="cover" // or "cover" based on your preference
-                            />
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -463,7 +475,10 @@ export default function ShopDetails() {
                       <SwiperSlide key={item.id}>
                         <div className="tpproduct pb-15 mb-30">
                           <div className="tpproduct__thumb p-relative">
-                            <Link href={`/shop-details/${item.id}`}>
+                            <Link
+                              href={`/produits/${item.name_by_filtered}`}
+                              onClick={(e) => handleLinkClick(e, item)}
+                            >
                               <Image
                                 width={300}
                                 height={300}
@@ -487,7 +502,10 @@ export default function ShopDetails() {
                               >
                                 <i className="fal fa-shopping-basket" />
                               </a>
-                              <Link href={`/shop-details/${item.id}`}>
+                              <Link
+                                href={`/produits/${item.name_by_filtered}`}
+                                onClick={(e) => handleLinkClick(e, item)}
+                              >
                                 <i className="fal fa-eye" />
                               </Link>
                               <a
@@ -502,7 +520,10 @@ export default function ShopDetails() {
 
                             <div className="tpproduct__content">
                               <h3 className="tpproduct__title">
-                                <Link href={`/shop-details/${item.id}`}>
+                                <Link
+                                  href={`/produits/${item.name_by_filtered}`}
+                                  onClick={(e) => handleLinkClick(e, item)}
+                                >
                                   {item.name}
                                 </Link>
                               </h3>
@@ -551,3 +572,31 @@ export default function ShopDetails() {
     </>
   );
 }
+// getServerSideProps to fetch data from the Express API
+export async function getServerSideProps(context) {
+  const { slug } = context.params;
+  try {
+    const response = await axios.get(
+      `${config_url}/api/interface/products/filtered/${slug}`
+    );
+    const initialData = response?.data[0];
+
+    return {
+      props: {
+        initialData,
+        nameByFiltered: slug,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch product:", error);
+
+    return {
+      props: {
+        initialData: null,
+        nameByFiltered: slug,
+      },
+    };
+  }
+}
+
+export default DetailsProduct;

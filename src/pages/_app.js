@@ -1,6 +1,7 @@
-import { store } from "@/features/store";
-import { Jost } from "next/font/google";
+import { store, persistor } from "@/features/store";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { Jost } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import "/public/assets/css/animate.css";
@@ -22,19 +23,22 @@ const jost = Jost({
 const MyApp = ({ Component, pageProps }) => {
   return (
     <Provider store={store}>
-      <Component {...pageProps} />
-      <ToastContainer
-        position="bottom-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
+      <PersistGate loading={null} persistor={persistor}>
+        {" "}
+        <Component {...pageProps} />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </PersistGate>
     </Provider>
   );
 };

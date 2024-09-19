@@ -5,9 +5,7 @@ import { config_url } from "@/util/config";
 import data from "../../util/blog.json";
 import BlogCard1 from "./BlogCard1";
 import Pagination from "./Pagination";
-export default function BlogPost({ style, showItem, showPagination }) {
-  const [blogs, setBlogs] = useState([]);
-
+export default function BlogPost({ style, blogs, showItem, showPagination }) {
   let [currentPage, setCurrentPage] = useState(1);
   let showLimit = showItem,
     paginationItem = 4;
@@ -19,16 +17,7 @@ export default function BlogPost({ style, showItem, showPagination }) {
   useEffect(() => {
     cratePagination();
   }, [limit, pages, blogs.length]);
-  useEffect(() => {
-    axios
-      .get(`${config_url}/api/blogs/`)
-      .then((res) => {
-        setBlogs(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching Blogs:", error);
-      });
-  }, []);
+
   const cratePagination = () => {
     // set pagination
     let arr = new Array(Math.ceil(blogs.length / limit))
@@ -60,7 +49,7 @@ export default function BlogPost({ style, showItem, showPagination }) {
   };
   return (
     <>
-      {getPaginatedProducts.length === 0 && <h3>No Products Found </h3>}
+      {getPaginatedProducts.length === 0 && <h3>No Blogs Found </h3>}
 
       {getPaginatedProducts.map((item) => (
         <React.Fragment key={item.id}>

@@ -79,19 +79,19 @@ const ShopCard = ({ item }) => {
               {item.status && (
                 <span className="tpproduct__thumb-topsall">{item.status}</span>
               )}
-              <Link href={`/shop-details/${item.id}`}>
+              <Link href={`/produits/${item.name_by_filtered}`}>
                 <Image
                   src={images.img1}
-                  alt="product-thumb"
                   width={300}
                   height={300}
+                  alt={item.meta_image}
                 />
                 <Image
                   className="thumbitem-secondary"
                   src={images.img3}
-                  alt="product-thumb"
                   width={300}
                   height={300}
+                  alt={item.meta_image}
                 />
               </Link>
               <div className="tpproduct__thumb-bg">
@@ -102,7 +102,7 @@ const ShopCard = ({ item }) => {
                   >
                     <i className="fal fa-shopping-basket" />
                   </a>
-                  <Link href={`/shop-details/${item.id}`}>
+                  <Link href={`/produits/${item.name_by_filtered}`}>
                     <i className="fal fa-eye" />
                   </Link>
                   <a
@@ -117,7 +117,9 @@ const ShopCard = ({ item }) => {
           </div>
           <div className="tpproduct__content-area">
             <h3 className="tpproduct__title mb-5">
-              <Link href={`/shop-details/${item.id}`}>{item.name}</Link>
+              <Link href={`/produits/${item.name_by_filtered}`}>
+                {item.name}
+              </Link>
             </h3>
             <div className="tpproduct__priceinfo p-relative d-flex gap-4">
               {item.price_promo === 0 ? (

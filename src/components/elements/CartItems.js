@@ -5,14 +5,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteCart } from "@/features/shopSlice";
 import { config_url } from "@/util/config";
 import Image from "next/image";
+
 const CartItems = () => {
   const { cart } = useSelector((state) => state.shop) || {};
 
   const dispatch = useDispatch();
 
   // delete cart item
-  const deleteCartHandler = (id) => {
-    dispatch(deleteCart(id));
+  const deleteCartHandler = (id, size) => {
+    dispatch(deleteCart({ id, size }));
   };
 
   return (
@@ -32,7 +33,7 @@ const CartItems = () => {
             </td>
 
             <td className="product-name">
-              <Link href={`/shop-details/${data.item.id}`}>
+              <Link href={`/produits/${data.item.name_by_filtered}`}>
                 {data.item.name}
               </Link>
             </td>
@@ -47,9 +48,9 @@ const CartItems = () => {
 
             <td className="product-price">{price.toFixed(2)} Dh</td>
 
-            <td className="product-remove">
+            <td className="product-remove text-center">
               <button
-                onClick={() => deleteCartHandler(data.item?.id)}
+                onClick={() => deleteCartHandler(data.item?.id, data.size)}
                 className="remove"
               >
                 <i className="fa fa-trash text-danger"></i>

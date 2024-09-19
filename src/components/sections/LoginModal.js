@@ -1,9 +1,8 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useDispatch } from "react-redux";
+import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
 import { loadCustomer } from "@/features/customerSlice";
 
 import { config_url } from "@/util/config";
@@ -13,14 +12,11 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepButton from "@mui/material/StepButton";
@@ -29,11 +25,11 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
 const defaultTheme = createTheme();
 const steps = ["Créer un compte", "Vérifier l'OTP", "Se connecter"];
 
 export default function LoginModal() {
+  const { customerInfo } = useSelector((state) => state.Customer) || {};
   const [open, setOpen] = React.useState(false);
   const [otp, setOtp] = useState("");
   const [activeStep, setActiveStep] = React.useState(0);
@@ -45,8 +41,13 @@ export default function LoginModal() {
     password: "",
   });
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleNext = () => {
+    if (activeStep === 0 && Object.keys(completed).length === 0) {
+      alert("You need to create an account first.");
+      return;
+    }
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -69,6 +70,12 @@ export default function LoginModal() {
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (Object.keys(customerInfo).length === 0) {
+      setOpen(true);
+    }
+  }, [customerInfo?.id]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues({
@@ -79,7 +86,6 @@ export default function LoginModal() {
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
-
     try {
       await axios.post(`${config_url}/api/customers`, {
         firstName: formValues.firstName,
@@ -87,52 +93,40 @@ export default function LoginModal() {
         email: formValues.email,
         password: formValues.password,
       });
-
-      // If account creation is successful, move to the next step
-      handleComplete();
+      setCompleted({ 0: true }); // Mark step 0 as complete
+      setActiveStep(1); // Move to the OTP verification step
     } catch (error) {
       console.error("Error creating account:", error);
-      // Handle error (e.g., display a notification to the user)
     }
   };
+
   const handleVerifyOtp = async () => {
     try {
       await axios.post(`${config_url}/api/customers/verify-otp`, {
-        email: formValues.email, // Assuming OTP is verified using email
+        email: formValues.email,
         otp,
       });
-
-      // If OTP verification is successful, move to the next step
       handleComplete();
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      // Handle error (e.g., display a notification to the user)
     }
   };
+
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${config_url}/api/customers/login`, {
-        email: formValues.email, // Ensure you use formValues here
+        email: formValues.email,
         password: formValues.password,
       });
-
-      // Check if login is successful
       if (response.data.token) {
         Cookies.set("token", response.data.token);
-        console.log(response.data);
+        router.reload();
         dispatch(loadCustomer(response.data.results));
-
-        // If OTP verification or login is successful, move to the next step
-        handleComplete(); // Make sure handleComplete is defined and available
+        handleComplete();
         setOpen(false);
-      } else {
-        // Handle cases where token is not returned (optional)
-        console.error("Login failed: No token received");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      // Display an error message to the user (optional)
-      alert("Login failed. Please check your credentials and try again.");
     }
   };
   const renderStepContent = (step) => {
@@ -203,15 +197,25 @@ export default function LoginModal() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              Créer un compte
             </Button>
+            {/* Add the text link to go to "Se connecter" */}
+            <Typography sx={{ mt: 2 }} align="center">
+              Vous avez déjà un compte ?{" "}
+              <span
+                style={{ color: "blue", cursor: "pointer" }}
+                onClick={() => setActiveStep(2)} // Navigate directly to step 3 (Se connecter)
+              >
+                Se connecter
+              </span>
+            </Typography>
           </Box>
         );
       case 1:
         return (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6">
-              Entrez l'OTP envoyé à votre adresse e-mail{" "}
+              Entrez l'OTP envoyé à votre adresse e-mail
             </Typography>
             <OtpInput
               value={otp}
@@ -227,7 +231,7 @@ export default function LoginModal() {
               sx={{ mt: 2 }}
               onClick={handleVerifyOtp}
             >
-              Vérifier l'OTP{" "}
+              Vérifier l'OTP
             </Button>
           </Box>
         );
@@ -245,7 +249,6 @@ export default function LoginModal() {
               onChange={handleInputChange}
               sx={{ mb: 2 }}
             />
-
             <TextField
               required
               fullWidth
@@ -257,15 +260,24 @@ export default function LoginModal() {
               value={formValues.password}
               onChange={handleInputChange}
             />
-
             <Button
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
               onClick={handleLogin}
             >
-              Login
+              Se connecter
             </Button>
+            {/* Add the text link to go back to "Créer un compte" */}
+            <Typography sx={{ mt: 2 }} align="center">
+              Vous n'avez pas encore de compte ?{" "}
+              <span
+                style={{ color: "blue", cursor: "pointer" }}
+                onClick={() => setActiveStep(0)} // Navigate back to step 1 (Créer un compte)
+              >
+                Créer un compte
+              </span>
+            </Typography>
           </Box>
         );
       default:
@@ -275,24 +287,19 @@ export default function LoginModal() {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Open Login Modal
-      </Button>
       <Dialog
         open={open}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
       >
-        <DialogTitle>{"Step-by-Step Login"}</DialogTitle>
         <DialogContent>
           <Box sx={{ width: "100%" }}>
             <Stepper nonLinear activeStep={activeStep}>
               {steps.map((label, index) => (
-                <Step key={label}>
+                <Step key={label} completed={completed[index]}>
                   <StepButton
-                    color="inherit"
+                    disabled={index > 0 && !completed[index - 1]} // Disable steps if previous ones aren't completed
                     onClick={() => setActiveStep(index)}
                   >
                     {label}
@@ -303,23 +310,6 @@ export default function LoginModal() {
             {renderStepContent(activeStep)}
           </Box>
         </DialogContent>
-        <DialogActions>
-          {activeStep > 0 && (
-            <Button onClick={handleBack} color="primary">
-              Back
-            </Button>
-          )}
-          {activeStep < steps.length - 1 && (
-            <Button onClick={handleNext} color="primary">
-              Next
-            </Button>
-          )}
-          {activeStep === steps.length - 1 && (
-            <Button onClick={handleClose} color="primary">
-              Finish
-            </Button>
-          )}
-        </DialogActions>
       </Dialog>
     </React.Fragment>
   );

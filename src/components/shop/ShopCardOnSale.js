@@ -84,7 +84,7 @@ const ShopCardOnSale = ({ item }) => {
               {percentage.toFixed(0)}%
             </span>
 
-            <Link href={`/shop-details/${item.id}`}>
+            <Link href={`/produits/${item.name_by_filtered}`}>
               <Image
                 width={300}
                 height={300}
@@ -108,7 +108,7 @@ const ShopCardOnSale = ({ item }) => {
               >
                 <i className="fal fa-shopping-basket" />
               </a>
-              <Link href={`/shop-details/${item.id}`}>
+              <Link href={`/produits/${item.name_by_filtered}`}>
                 <i className="fal fa-eye" />
               </Link>
               <a
@@ -122,7 +122,9 @@ const ShopCardOnSale = ({ item }) => {
 
           <div className="tpproduct__content">
             <h3 className="tpproduct__title">
-              <Link href={`/shop-details/${item.id}`}>{item.name}</Link>
+              <Link href={`/produits/${item.name_by_filtered}`}>
+                {item.name}
+              </Link>
             </h3>
             <div className="tpproduct__priceinfo p-relative">
               <div className="tpproduct__priceinfo-list">

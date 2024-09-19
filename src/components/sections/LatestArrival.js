@@ -1,17 +1,11 @@
 "use client";
 import axios from "axios";
 
-import Layout from "@/components/layout/Layout";
-import FilterSidebar from "@/components/shop/FilterSidebar";
 import { Fragment, useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { config_url } from "@/util/config";
 import Preloader from "@/components/elements/Preloader";
-import FilterDataOnSale from "@/components/shop/FilterDataOnSale";
-
-export default function OnSale() {
-  const { categoryList } = useSelector((state) => state.Categories) || {};
-
+import FilterDataLatestArrival from "../shop/FilterDataLatestArrival";
+export default function LatestArrival() {
   const [data, setData] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +13,7 @@ export default function OnSale() {
 
   useEffect(() => {
     axios
-      .get(`${config_url}/api/products/promotion`)
+      .get(`${config_url}/api/products/release`)
       .then((res) => {
         setData(res.data);
         setFilteredJobs(res.data);
@@ -32,22 +26,41 @@ export default function OnSale() {
   }, []);
   const handleFilterChange = (filters) => {
     let filtered = [...data];
-    console.log("Initial Data:", filtered);
 
     if (filters.sizes.length > 0) {
       filtered = filtered.filter((product) => {
         const productSizes = JSON.parse(product.nemuro_shoes);
         return filters.sizes.some((size) => productSizes.includes(size));
       });
-      console.log("After Size Filter:", filtered);
     }
-    console.log("Filters:", filters.category);
 
     if (filters.category.length > 0) {
       filtered = filtered.filter((product) =>
         filters.category.includes(product.category_names)
       );
-      console.log("After Category Filter:", filtered);
+    }
+    if (filters.genre.length > 0) {
+      console.log("Genre Filters:", filters.genre);
+
+      filtered = filtered.filter((product) => {
+        // Normalize genres by converting to lowercase
+        const productGenres = product.genre
+          .toLowerCase()
+          .split(",")
+          .map((g) => g.trim());
+        const filterGenres = filters.genre.map((g) => g.toLowerCase());
+
+        // Check if any of the product genres match the filter genres
+        const matches = productGenres.some((genre) =>
+          filterGenres.includes(genre)
+        );
+        console.log(
+          `Checking product ${product.id} with genres ${productGenres}: ${matches}`
+        );
+        return matches;
+      });
+
+      console.log("After Genre Filter:", filtered);
     }
 
     filtered = filtered.filter(
@@ -63,24 +76,28 @@ export default function OnSale() {
 
   return (
     <Fragment>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop">
-        <div className="product-area pt-70 pb-20">
+      <div className="pt-40">
+        <h3 className="text-center fw-bolder fs-4 text-uppercase">
+          Latest Apparel Arrivals
+        </h3>
+        <div className="product-area pt-30 pb-20">
           <div className="container">
             <div className="row">
-              <div className="col-lg-10 col-md-12">
-                <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
-                  <FilterDataOnSale filterData={filteredJobs} />
-                </div>
-              </div>
-              <div className="col-lg-2 col-md-12">
-                <div className="tpsidebar product-sidebar__product-category">
-                  <FilterSidebar onFilterChange={handleFilterChange} />
+              <div className="col-lg-12 col-md-12">
+                <div className="row row-cols-xxl-6 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
+                  <FilterDataLatestArrival
+                    status="new"
+                    showItem={4}
+                    style={1}
+                    //showPagination
+                    filterData={filteredJobs}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     </Fragment>
   );
 }

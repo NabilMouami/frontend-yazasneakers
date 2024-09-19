@@ -71,7 +71,7 @@ export default function WhiteProduct() {
                 <SwiperSlide key={item.id}>
                   <div className="whiteproduct">
                     <div className="whiteproduct__thumb">
-                      <Link href={`/shop-details/${item.id}`}>
+                      <Link href={`/produits/${item.name_by_filtered}`}>
                         <Image
                           src={`${config_url}/images/${item.image}`}
                           alt="product-thumb"

@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
-import { Fragment, useState, useEffect, useMemo } from "react";
+import { Fragment, useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -18,9 +18,10 @@ import {
   FormControlLabel,
   FormControl,
   FormLabel,
+  Checkbox,
+  FormGroup,
 } from "@mui/material";
-import Checkbox from "@mui/material/Checkbox";
-const LoginModel = dynamic(() => import("@/components/sections/LoginModal"), {
+const LoginModal = dynamic(() => import("@/components/sections/LoginModal"), {
   loading: () => <p>Loading Login...</p>,
 });
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -34,11 +35,10 @@ const CartItems = dynamic(() => import("@/components/elements/CartItems"), {
 import { config_url } from "@/util/config";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import LoginModal from "@/components/sections/LoginModal";
+import { toast } from "react-toastify";
 export default function Checkout() {
   const { cart } = useSelector((state) => state.shop) || {};
   const { customerInfo } = useSelector((state) => state.Customer) || {};
-  const [open, setOpen] = useState(false);
 
   const [productList, setProductList] = useState([]);
   console.log(productList);
@@ -72,7 +72,7 @@ export default function Checkout() {
   }, [cart]);
 
   // Calculate the maximum amount of coins that can be used (60% of the total price)
-  const maxCoinsAllowed = (total * 0.6) / 2.5;
+  const maxCoinsAllowed = total * 0.6 * 10;
 
   // Calculate the actual amount of coins the user can use (lesser of available coins and max allowed)
   const usableCoins = Math.min(
@@ -134,13 +134,6 @@ export default function Checkout() {
 
   const [isLoginToggle, setLoginToggle] = useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
   const handleLoginToggle = () => setLoginToggle(!isLoginToggle);
 
   const validateStep1 = () => {
@@ -198,10 +191,6 @@ export default function Checkout() {
     }
   }, [customerInfo]);
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
   const handleReset = () => {
     setActiveStep(0);
     setFormValidations({ step1: false, step2: false });
@@ -227,14 +216,21 @@ export default function Checkout() {
       setProductList(updatedProductList);
     }
   }, [cart]);
+
+  useEffect(() => {
+    if (alert.visible) {
+      toast.warning(alert.message, {
+        onClose: () => setAlert({ visible: false, message: "" }),
+      });
+    }
+  }, [alert.visible]); // Runs when alert.visible changes
+
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
     setShowInputCoins(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevents the default form submission
-
+  const handleSubmit = () => {
     if (Object.keys(customerInfo).length === 0) {
       router.push("/sign-in");
       return;
@@ -255,7 +251,7 @@ export default function Checkout() {
           customer_id: customerInfo.id,
           items: productList,
           total_price: (total - coinsUsed / 10).toFixed(2),
-          payment_status: "COD",
+          payment_status: paymentType,
           order_num: max_num_order[0]?.max_num_order + 1,
           coins_paid: coinsUsed,
         }),
@@ -292,14 +288,12 @@ export default function Checkout() {
 
   function AdForm() {
     return (
-      <div className="container-fluid">
+      <div className="">
         <div className="row">
-          <div className="col-18 col-md-8 delivery-info">
+          <div className="fw-bold col-18 col-md-8 delivery-info">
             <span>Livraison à domicile</span>
-            <span>24-72H</span>
-          </div>
-          <div className="col-18 col-md-4 text-md-right delivery-info">
-            <span className="delivery-price">35,00 MAD TTC</span>
+            <br />
+            <span>24-72H 35,00 MAD TTC</span>
           </div>
         </div>
       </div>
@@ -375,167 +369,157 @@ export default function Checkout() {
             data-wow-delay=".2s"
           >
             <div className="container">
-              <form onSubmit={handleSubmit}>
-                <div className="row">
-                  <div className="col-lg-6 col-md-12">
-                    <ThemeProvider theme={theme}>
-                      <Box sx={{ maxWidth: 400 }}>
-                        {alert.visible && (
-                          <Alert
-                            severity="warning"
-                            onClose={() =>
-                              setAlert({ visible: false, message: "" })
-                            }
-                          >
-                            {alert.message}
-                          </Alert>
-                        )}
-                        <Stepper activeStep={activeStep} orientation="vertical">
-                          {steps.map((step, index) => (
-                            <Step key={step.label}>
-                              <StepLabel
-                                optional={
-                                  index === 3 ? (
-                                    <Typography variant="caption">
-                                      Last step
-                                    </Typography>
-                                  ) : null
-                                }
-                              >
-                                {step.label}
-                              </StepLabel>
-                              <StepContent>
-                                {index === 0 && (
-                                  <div className="checkbox-form">
-                                    <div className="row">
-                                      <div className="col-md-12">
-                                        <div className="checkout-form-list">
-                                          <label>
-                                            Prenom{" "}
-                                            <span className="required">*</span>
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Prenom:"
-                                            defaultValue={prenom}
-                                            onChange={(e) =>
-                                              setPreNom(e.target.value)
-                                            }
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="col-md-12">
-                                        <div className="checkout-form-list">
-                                          <label>
-                                            Nom{" "}
-                                            <span className="required">*</span>
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder="Nom:"
-                                            defaultValue={nom}
-                                            onChange={(e) =>
-                                              setNom(e.target.value)
-                                            }
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="col-md-12">
-                                        <div className="checkout-form-list">
-                                          <label>
-                                            Email Address{" "}
-                                            <span className="required">*</span>
-                                          </label>
-                                          <input
-                                            type="email"
-                                            placeholder="Email:"
-                                            defaultValue={email}
-                                            onChange={(e) =>
-                                              setEmail(e.target.value)
-                                            }
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="col-md-12">
-                                        <div className="checkout-form-list">
-                                          <label>
-                                            Telephone{" "}
-                                            <span className="required">*</span>
-                                          </label>
-                                          <input
-                                            type="text"
-                                            defaultValue={telephone}
-                                            placeholder="Telephone:"
-                                            onChange={(e) =>
-                                              setTelephone(e.target.value)
-                                            }
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                                {index === 1 && (
-                                  <div>
+              <div className="row">
+                <div className="col-lg-6 col-md-12">
+                  <ThemeProvider theme={theme}>
+                    <Box sx={{ maxWidth: 400 }}>
+                      <Stepper activeStep={activeStep} orientation="vertical">
+                        {steps.map((step, index) => (
+                          <Step key={step.label}>
+                            <StepLabel
+                              optional={
+                                index === 3 ? (
+                                  <Typography variant="caption">
+                                    Last step
+                                  </Typography>
+                                ) : null
+                              }
+                            >
+                              {step.label}
+                            </StepLabel>
+                            <StepContent>
+                              {index === 0 && (
+                                <div className="checkbox-form">
+                                  <div className="row">
                                     <div className="col-md-12">
                                       <div className="checkout-form-list">
                                         <label>
-                                          Address{" "}
+                                          Prenom{" "}
                                           <span className="required">*</span>
                                         </label>
                                         <input
                                           type="text"
-                                          placeholder="Street address"
-                                          defaultValue={adresse}
+                                          placeholder="Prenom:"
+                                          defaultValue={prenom}
                                           onChange={(e) =>
-                                            setAdresse(e.target.value)
+                                            setPreNom(e.target.value)
                                           }
                                         />
                                       </div>
                                     </div>
                                     <div className="col-md-12">
                                       <div className="checkout-form-list">
+                                        <label>
+                                          Nom{" "}
+                                          <span className="required">*</span>
+                                        </label>
                                         <input
                                           type="text"
-                                          placeholder="Apartment, suite, unit etc. (optional)"
+                                          placeholder="Nom:"
+                                          defaultValue={nom}
+                                          onChange={(e) =>
+                                            setNom(e.target.value)
+                                          }
                                         />
                                       </div>
                                     </div>
                                     <div className="col-md-12">
                                       <div className="checkout-form-list">
                                         <label>
-                                          Ville{" "}
+                                          Email Address{" "}
                                           <span className="required">*</span>
                                         </label>
                                         <input
-                                          type="text"
-                                          placeholder="Ville au Maroc"
+                                          type="email"
+                                          placeholder="Email:"
+                                          defaultValue={email}
                                           onChange={(e) =>
-                                            setVille(e.target.value)
+                                            setEmail(e.target.value)
                                           }
                                         />
                                       </div>
                                     </div>
-                                    <div className="col-md-6">
+                                    <div className="col-md-12">
                                       <div className="checkout-form-list">
                                         <label>
-                                          Code Postal{" "}
+                                          Telephone{" "}
                                           <span className="required">*</span>
                                         </label>
                                         <input
                                           type="text"
-                                          defaultValue={code_postal}
-                                          placeholder="Code Postal en ville"
+                                          defaultValue={telephone}
+                                          placeholder="Telephone:"
                                           onChange={(e) =>
-                                            setCodePostal(e.target.value)
+                                            setTelephone(e.target.value)
                                           }
                                         />
                                       </div>
                                     </div>
                                   </div>
-                                )}
-                                {index === 2 && <AdForm />}
-                                {index === 3 && (
+                                </div>
+                              )}
+                              {index === 1 && (
+                                <div>
+                                  <div className="col-md-12">
+                                    <div className="checkout-form-list">
+                                      <label>
+                                        Address{" "}
+                                        <span className="required">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        placeholder="Street address"
+                                        defaultValue={adresse}
+                                        onChange={(e) =>
+                                          setAdresse(e.target.value)
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="col-md-12">
+                                    <div className="checkout-form-list">
+                                      <input
+                                        type="text"
+                                        placeholder="Apartment, suite, unit etc. (optional)"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="col-md-12">
+                                    <div className="checkout-form-list">
+                                      <label>
+                                        Ville{" "}
+                                        <span className="required">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        placeholder="Ville au Maroc"
+                                        onChange={(e) =>
+                                          setVille(e.target.value)
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="col-md-6">
+                                    <div className="checkout-form-list">
+                                      <label>
+                                        Code Postal{" "}
+                                        <span className="required">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        defaultValue={code_postal}
+                                        placeholder="Code Postal en ville"
+                                        onChange={(e) =>
+                                          setCodePostal(e.target.value)
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {index === 2 && <AdForm />}
+                              {index === 3 && (
+                                <>
                                   <FormControl>
                                     <FormLabel id="demo-radio-buttons-group-label">
                                       Type De Paiement
@@ -544,7 +528,7 @@ export default function Checkout() {
                                       aria-labelledby="demo-radio-buttons-group-label"
                                       defaultValue="COD"
                                       value={paymentType}
-                                      onChange={handlePaymentTypeChange} // Add onChange here
+                                      onChange={handlePaymentTypeChange}
                                       name="radio-buttons-group"
                                     >
                                       <FormControlLabel
@@ -553,178 +537,202 @@ export default function Checkout() {
                                         label="Payer comptant à la livraison"
                                       />
                                       <FormControlLabel
-                                        value="Payed-Online"
+                                        value="Paid-Online"
                                         control={<Radio />}
                                         label="Payer En Ligne"
                                       />
                                     </RadioGroup>
-
-                                    <FormLabel id="demo-radio-buttons-group-label-coins">
-                                      un choix Si Vous vloulez aussi payer par
-                                      votre Coins
-                                    </FormLabel>
-
-                                    <RadioGroup
-                                      aria-labelledby="demo-radio-buttons-group-label-coins"
-                                      defaultValue="COINS"
-                                      value={checkCoins}
-                                      onChange={(e) => {
-                                        setShowInputCoins(true);
-                                        setCheckCoins(e.target.value);
-                                      }} // Add onChange here
-                                      name="radio-buttons-coins"
-                                    >
-                                      <FormControlLabel
-                                        value="COINS"
-                                        control={<Radio />}
-                                        label="Payer ainsi par votre coins"
-                                      />
-                                    </RadioGroup>
-                                    {showInputCoins &&
-                                      customerInfo?.balance !== 0 && (
-                                        <div className="checkout-form-list">
-                                          <label htmlFor="coins">
-                                            Payer Par Votre Balance Coins:{" "}
-                                            <span className="required">*</span>
-                                          </label>
-                                          <input
-                                            type="number"
-                                            id="coins"
-                                            placeholder="Coins"
-                                            value={coinsUsed}
-                                            max={usableCoins}
-                                            onChange={(e) =>
-                                              handleCoinsChange(e)
-                                            }
-                                          />
-                                        </div>
-                                      )}
                                   </FormControl>
-                                )}
-                                <Box sx={{ mb: 2 }}>
-                                  <div>
-                                    <Button
-                                      variant="contained"
-                                      onClick={handleNext}
-                                      sx={{ mt: 1, mr: 1 }}
-                                    >
-                                      {index === steps.length - 1
-                                        ? "Place Order"
-                                        : "Continue"}
-                                    </Button>
-                                    <Button
-                                      disabled={index === 0}
-                                      onClick={handleBack}
-                                      sx={{ mt: 1, mr: 1 }}
-                                    >
-                                      Retour
-                                    </Button>
-                                  </div>
-                                </Box>
-                              </StepContent>
-                            </Step>
-                          ))}
-                        </Stepper>
-                        {activeStep === steps.length && (
-                          <Paper square elevation={0} sx={{ p: 3 }}>
-                            <Typography>
-                              All steps completed - you&apos;re finished
-                            </Typography>
-                            <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-                              Reset
-                            </Button>
-                          </Paper>
-                        )}
-                      </Box>
-                    </ThemeProvider>
-                  </div>
-                  <div className="col-lg-6 col-md-12">
-                    <div className="your-order mb-30 ">
-                      <h3>Your order</h3>
-                      <div className="your-order-table table-responsive">
-                        <div className="table-content table-responsive">
-                          <table className="table">
-                            <thead>
-                              <tr>
-                                <th className="product-thumbnail">Images</th>
-                                <th className="cart-product-name">
-                                  Produit Nom
-                                </th>
-                                <th className="cart-product-name">Size</th>
-                                <th className="product-price">Unit Price</th>
-                                <th className="product-remove">Remove</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <CartItems />
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                      <div className="your-order-table table-responsive">
-                        <table>
+                                  {customerInfo?.balance !== 0 &&
+                                    Object.keys(customerInfo).length !== 0 && (
+                                      <div>
+                                        <FormLabel id="demo-checkbox-group-label-coins">
+                                          Un choix si vous voulez aussi payer
+                                          par votre Coins
+                                        </FormLabel>
+
+                                        <FormGroup>
+                                          <FormControlLabel
+                                            control={
+                                              <Checkbox
+                                                checked={checkCoins === "COINS"}
+                                                onChange={(e) => {
+                                                  setShowInputCoins(
+                                                    e.target.checked
+                                                  );
+                                                  setCheckCoins(
+                                                    e.target.checked
+                                                      ? "COINS"
+                                                      : ""
+                                                  );
+                                                }}
+                                                name="checkbox-coins"
+                                              />
+                                            }
+                                            label="Payer ainsi par votre coins"
+                                          />
+                                        </FormGroup>
+
+                                        {showInputCoins && (
+                                          <div>
+                                            <h4>
+                                              {customerInfo?.balance} COINS ={" "}
+                                              {customerInfo?.balance / 10} Dh
+                                              available
+                                            </h4>
+                                            <div className="checkout-form-list">
+                                              <label htmlFor="coins">
+                                                Payer Par Votre Balance Coins:{" "}
+                                                <span className="required">
+                                                  *
+                                                </span>
+                                              </label>
+                                              <input
+                                                type="number"
+                                                id="coins"
+                                                placeholder="Coins"
+                                                value={coinsUsed}
+                                                max={usableCoins}
+                                                onChange={(e) =>
+                                                  handleCoinsChange(e)
+                                                }
+                                              />
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                </>
+                              )}
+                              <Box sx={{ mb: 2 }}>
+                                <div>
+                                  <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                      if (index === steps.length - 1) {
+                                        // Submit the form programmatically
+                                        handleSubmit();
+                                      } else {
+                                        handleNext();
+                                      }
+                                    }}
+                                    sx={{ mt: 1, mr: 1 }}
+                                  >
+                                    {index === steps.length - 1
+                                      ? "Commander"
+                                      : "Continue"}
+                                  </Button>
+                                </div>
+                              </Box>
+                            </StepContent>
+                          </Step>
+                        ))}
+                      </Stepper>
+                      {activeStep === steps.length && (
+                        <Paper square elevation={0} sx={{ p: 3 }}>
+                          <Typography>
+                            All steps completed - you&apos;re finished
+                          </Typography>
+                          <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
+                            Reset
+                          </Button>
+                        </Paper>
+                      )}
+                    </Box>
+                  </ThemeProvider>
+                </div>
+                <div className="col-lg-6 col-md-12">
+                  <div className="your-order mb-30 ">
+                    <h3>Votre Commande</h3>
+                    <div className="your-order-table table-responsive">
+                      <div className="table-content table-responsive">
+                        <table className="table">
                           <thead>
                             <tr>
-                              <th className="product-name">Product</th>
-                              <th className="product-total">Total</th>
+                              <th className="product-thumbnail">Images</th>
+                              <th className="cart-product-name">Produit</th>
+                              <th className="cart-product-name">Pointure</th>
+                              <th className="product-price">Prix</th>
+                              <th className="ml-30">Retirer</th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr className="cart_item">
-                              <td className="product-name">Prix Original </td>
-                              <td className="product-total">
-                                <span className="amount">
-                                  {" "}
-                                  {total_original.toFixed(2)}.00 Dh
-                                </span>
-                              </td>
-                            </tr>
-                            <tr className="cart_item">
-                              <td className="product-name">Vous Souvegardez</td>
-                              <td className="product-total">
-                                <span className="amount">
-                                  {" "}
-                                  - {total_porcentage.toFixed(2)} Dh
-                                </span>
-                              </td>
-                            </tr>
+                            <CartItems />
                           </tbody>
-                          <tfoot>
-                            <tr className="cart-subtotal">
-                              <th>Cart Subtotal</th>
-                              <td>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="your-order-table table-responsive">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th className="product-name">Produit</th>
+                            <th className="product-total">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="cart_item">
+                            <td className="product-name">Prix Original </td>
+                            <td className="product-total">
+                              <span className="amount">
+                                {" "}
+                                {total_original.toFixed(2)}.00 Dh
+                              </span>
+                            </td>
+                          </tr>
+                          <tr className="cart_item">
+                            <td className="product-name">Vous Souvegardez</td>
+                            <td className="product-total">
+                              <span className="amount">
+                                {" "}
+                                - {total_porcentage.toFixed(2)} Dh
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <tfoot>
+                          <tr className="cart-subtotal">
+                            <th>Cart Subtotal</th>
+                            <td>
+                              <span className="amount">
+                                {total.toFixed(2)} Dh
+                              </span>
+                            </td>
+                          </tr>
+                          <tr className="shipping">
+                            <th>Shipping(Service Charge)</th>
+                            <td>
+                              <span className="amount">
+                                {total.toFixed(2) < 1000 ? "50" : "0"} Dh
+                              </span>
+                            </td>
+                          </tr>
+                          <tr className="order-total">
+                            <th>Commande Total</th>
+                            <td>
+                              <strong>
                                 <span className="amount">
                                   {total.toFixed(2)} Dh
                                 </span>
-                              </td>
-                            </tr>
-                            <tr className="shipping">
-                              <th>Shipping(Service Charge)</th>
-                              <td>
-                                <span className="amount">
-                                  {total.toFixed(2) < 1000 ? "50" : "0"} Dh
-                                </span>
-                              </td>
-                            </tr>
-                            <tr className="order-total">
-                              <th>Order Total</th>
-                              <td>
-                                <strong>
-                                  <span className="amount">
-                                    {total.toFixed(2)} Dh
-                                  </span>
-                                </strong>
-                              </td>
-                            </tr>
-                            {Object.keys(customerInfo).length !== 0 && (
+                              </strong>
+                            </td>
+                          </tr>
+                          {customerInfo?.balance !== 0 &&
+                            Object.keys(customerInfo).length !== 0 && (
                               <>
                                 <tr className="order-total">
-                                  <th>Available Coins Total</th>
+                                  <th> Vous gagnez</th>
                                   <td>
                                     <strong>
                                       <span className="amount">
-                                        <i className="fa fa-coins text-success"></i>{" "}
-                                        Coins + {chooisePriceCoins}
+                                        <img
+                                          width="20"
+                                          height="20"
+                                          src="/assets/img/logo/coins.png"
+                                          className="mr-10"
+                                          alt="icon-coins"
+                                        />
+                                        Coins + {total / 2.5}
                                       </span>
                                     </strong>
                                   </td>
@@ -735,7 +743,13 @@ export default function Checkout() {
                                   </th>
                                   <td>
                                     <span className="amount">
-                                      <i className="fa fa-coins text-success"></i>{" "}
+                                      <img
+                                        width="20"
+                                        height="20"
+                                        src="/assets/img/logo/coins.png"
+                                        className="mr-10"
+                                        alt="icon-coins"
+                                      />{" "}
                                       Coins + {usableCoins}
                                     </span>
                                   </td>
@@ -745,7 +759,13 @@ export default function Checkout() {
                                   <td>
                                     <strong>
                                       <span className="amount">
-                                        <i className="fa fa-coins text-success"></i>{" "}
+                                        <img
+                                          width="20"
+                                          height="20"
+                                          src="/assets/img/logo/coins.png"
+                                          className="mr-10"
+                                          alt="icon-coins"
+                                        />{" "}
                                         Coins + {coinsUsed} Coins
                                       </span>
                                     </strong>
@@ -773,33 +793,12 @@ export default function Checkout() {
                                 </tr>
                               </>
                             )}
-                          </tfoot>
-                        </table>
-                      </div>
-                      <div className="payment-method">
-                        <div className="order-button-payment mt-20">
-                          <button
-                            type="submit"
-                            className="tp-btn tp-color-btn w-100 banner-animation"
-                            style={
-                              Object.keys(customerInfo).length === 0
-                                ? {
-                                    pointerEvents: "none", // Disables hover and click events
-                                    opacity: 0.65, // Gives the button a disabled look
-                                    cursor: "not-allowed", // Changes the cursor to indicate it's not clickable
-                                  }
-                                : {}
-                            }
-                            // disabled={Object.keys(customerInfo).length === 0}
-                          >
-                            Valider la commande
-                          </button>
-                        </div>
-                      </div>
+                        </tfoot>
+                      </table>
                     </div>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </section>
         </div>

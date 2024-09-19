@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { loadAllProducts } from "@/features/productsSlice";
 import axios from "axios";
 import { config_url } from "@/util/config";
-import FilterShopCategory from "../shop/FilterShopCategory";
 
 export default function Product1() {
   const { categoryList } = useSelector((state) => state.Categories) || {};
@@ -85,16 +84,7 @@ export default function Product1() {
               role="tabpanel"
               aria-labelledby="nav-category-tab"
             >
-              <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
-                <FilterShopCategory
-                  showItem={6}
-                  style={1}
-                  showPagination
-                  loading={loading}
-                  listProducts={listProducts}
-                  selectedCategories={selectedCategories}
-                />
-              </div>
+              <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2"></div>
             </div>
           </div>
         </div>
