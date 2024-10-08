@@ -51,10 +51,10 @@ export default function HeaderSticky({
                       <Link href="/new">New</Link>
                     </li>
                     <li className="ml-40">
-                      <Link href="/collections/sneakers">Sneakers</Link>
+                      <a href="/collections/sneakers">Sneakers</a>
                     </li>
                     <li className="ml-40">
-                      <Link href="/collections/accessoire">Accessoires</Link>
+                      <a href="/collections/accessoire">Accessoires</a>
                     </li>
                     <li className="ml-40">
                       <Link href="/on-sale">Sale</Link>
@@ -91,7 +91,7 @@ export default function HeaderSticky({
                     <WishListShow />
                   </Link>
                 </div>
-                {Object.keys(customerInfo).length !== 0 && (
+                {customerInfo && Object.keys(customerInfo).length !== 0 && (
                   <div className="header-meta__search-5 ml-25">
                     <div className="header-meta__lang">
                       <ul className="font-small">

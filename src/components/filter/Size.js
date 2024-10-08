@@ -39,7 +39,9 @@ function SizeSidebar({
                 onChange={handleCheckboxChange}
                 className="form-check-input"
               />
-              <span className="text-dark font-weight-semibold">{size}</span>
+              <span className="text-dark font-weight-semibold mt-15">
+                {size}
+              </span>
             </div>
           ))}
           {allSizes.length > 5 && (

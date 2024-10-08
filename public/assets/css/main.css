@@ -66,7 +66,7 @@
   --tp-grey-8: #f6f6f6;
   --tp-grey-9: #999999;
   --tp-text-body: #040404;
-  --tp-text-primary: hsl(12, 84%, 45%);
+  --tp-text-primary: #1d7837;
   --tp-text-secondary: #777777;
   --tp-text-tertiary: #adadad;
   --tp-text-4: #a0a0a0;
@@ -113,6 +113,39 @@ body {
   color: var(--tp-text-body);
   line-height: 26px;
   overflow-x: hidden !important;
+}
+.custom-left-nav,
+.custom-right-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+  color: white;
+  font-size: 24px;
+}
+
+.custom-left-nav {
+  left: 10px;
+}
+
+.custom-right-nav {
+  right: 10px;
+}
+
+.custom-left-nav:hover,
+.custom-right-nav:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.custom-left-nav:disabled,
+.custom-right-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .gallery {
@@ -175,10 +208,26 @@ body {
   overflow: hidden;
   object-position: center center;
 }
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 a {
   text-decoration: none;
 }
-
+li.active a {
+  font-weight: bold;
+  color: #007bff;
+}
 h1,
 h2,
 h3,
@@ -225,7 +274,9 @@ ul {
   margin: 0px;
   padding: 0px;
 }
-
+.submenu-items {
+  color: var(--tp-grey-4);
+}
 p {
   font-family: var(--tp-ff-body);
   font-size: 18px;
@@ -1178,7 +1229,7 @@ input[type="color"] {
 }
 
 .header-search-bar {
-  width: 40%;
+  width: 60%;
 }
 
 .header-search-bar .header-search-icon {
@@ -2995,8 +3046,7 @@ a.add-to-cart {
 /*----------------------------------------*/
 .tpproduct:hover .tpproduct__priceinfo-list {
   bottom: 0px;
-  visibility: hidden;
-  opacity: 0;
+  opacity: 1;
 }
 
 .tpproduct:hover .tpproduct__cart {
@@ -3016,6 +3066,8 @@ a.add-to-cart {
 .tpproduct__thumb {
   position: relative;
   margin-bottom: 17px;
+  height: auto;
+  width: 100%;
 }
 
 .tpproduct__thumb:hover .tpproduct__thumb-action a {
@@ -3060,7 +3112,7 @@ a.add-to-cart {
 
 .tpproduct__thumb-volt {
   position: absolute;
-  top: 25px;
+  bottom: 25px;
   left: 25px;
   padding: 4px 7px;
   background-color: red;
@@ -3077,6 +3129,20 @@ a.add-to-cart {
   left: 10px;
   padding: 4px 7px;
   background-color: #00712d;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--tp-common-white);
+  line-height: 1;
+  padding: 8px 15px;
+  z-index: 2;
+}
+.tpproduct__thumb-soldout {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 7px;
+  background-color: #ad1527;
   text-transform: uppercase;
   font-weight: 600;
   font-size: 12px;
@@ -3176,6 +3242,7 @@ a.add-to-cart {
 .tpproduct__thumb img {
   border-radius: 6px;
   width: 100%;
+  height: auto;
 }
 
 .tpproduct__thumb-icon {
@@ -3259,17 +3326,6 @@ a.add-to-cart {
 
 .tpproduct__title a:hover {
   color: var(--tp-text-primary);
-}
-
-.tpproduct__priceinfo-list {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
-  -webkit-transition: all 0.3s ease-out 0s;
-  -moz-transition: all 0.3s ease-out 0s;
-  -ms-transition: all 0.3s ease-out 0s;
-  -o-transition: all 0.3s ease-out 0s;
-  transition: all 0.3s ease-out 0s;
 }
 
 .tpproduct__priceinfo-list span {
@@ -3686,13 +3742,13 @@ a.add-to-cart {
 .whiteproduct {
   background-color: var(--tp-common-white);
 }
-
-.whiteproduct__thumb img {
+.whiteproduct__thumb {
   max-width: 100%;
+  max-height: 100%;
 }
-
-.whiteproduct__content {
-  padding: 0 40px 40px 40px;
+.whiteproduct__thumb .img-sales {
+  max-width: 100%;
+  height: 100%;
 }
 
 .whiteproduct__title {
@@ -4563,9 +4619,6 @@ a.add-to-cart {
 
 .zoom-image {
   transition: transform 0.3s ease; /* Smooth transition effect */
-  width: 100%; /* Ensures the image fills the container initially */
-  height: 100%; /* Ensures the image fills the container initially */
-  object-fit: cover; /* Ensures the image covers the container while maintaining aspect ratio */
 }
 
 .zoom-image:hover {
@@ -4741,7 +4794,7 @@ a.add-to-cart {
   }
 
   .overlay {
-    left: 35%;
+    left: 33%;
     padding: 5px;
     font-size: 10px;
   }
@@ -7495,7 +7548,9 @@ p.checkout-coupon input[type="text"]:focus {
 .panel-default > .panel-heading {
   border-radius: 0;
 }
-
+.checkout-area {
+  margin: 10px 30px;
+}
 .your-order {
   padding: 30px 40px 45px;
   border: 3px solid rgba(213, 18, 67, 0.3);
@@ -7504,6 +7559,9 @@ p.checkout-coupon input[type="text"]:focus {
 @media (max-width: 767px) {
   .your-order {
     padding: 15px;
+  }
+  .checkout-area {
+    margin: 10px 5px;
   }
 }
 
@@ -8036,11 +8094,13 @@ p.checkout-coupon input[type="text"]:focus {
 /*----------------------------------------*/
 .tpsign__account {
   margin-bottom: 18px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .tpsign__account a {
   text-decoration: underline;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 400;
   color: var(--tp-text-body);
 }

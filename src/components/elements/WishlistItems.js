@@ -1,40 +1,28 @@
 "use client";
-import { addCart } from "@/features/shopSlice";
-import {
-  addQty,
-  addWishlistWithSize,
-  deleteWishlist,
-} from "@/features/wishlistSlice";
+import { deleteWishlist } from "@/features/wishlistSlice";
+
 import { RiAddFill, RiDeleteBin2Fill } from "react-icons/ri";
-import { addCartWithSize } from "@/features/shopSlice";
+import { addCartWithSize, deleteCart } from "@/features/shopSlice";
 
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { config_url } from "@/util/config";
 const WishlistItems = () => {
   const { wishlist } = useSelector((state) => state.wishlist) || {};
   const { productList } = useSelector((state) => state.Products) || {};
 
   const dispatch = useDispatch();
 
-  // delete cart item
-  const deleteCartHandler = (id) => {
-    dispatch(deleteWishlist(id));
+  // delete wishlist item
+  const deleteWishListHandler = (id, size) => {
+    dispatch(deleteWishlist({ id, size }));
   };
+
   const addToCart = (id, size) => {
     const item = productList?.find((item) => item.id === id);
     const itemwithsize = { item, size };
     console.log(itemwithsize);
     dispatch(addCartWithSize({ product: itemwithsize }));
   };
-
-  // qty handler
-  const qtyHandler = (id, qty) => {
-    dispatch(addQty({ id, qty }));
-  };
-
-  console.log(wishlist);
-
   return (
     <>
       {wishlist?.map((data) => {
@@ -44,10 +32,7 @@ const WishlistItems = () => {
           <tr className="cart-item" key={data.item.id}>
             <td className="product-thumbnail">
               <Link href={`/produits/${data.item.name_by_filtered}`}>
-                <img
-                  src={`${config_url}/images/${data.item.image}`}
-                  alt="cart added product"
-                />
+                <img src={data.item.image} alt="cart added product" />
               </Link>
             </td>
 
@@ -81,7 +66,7 @@ const WishlistItems = () => {
 
             <td className="product-remove">
               <button
-                onClick={() => deleteCartHandler(data.item?.id)}
+                onClick={() => deleteWishListHandler(data.item?.id, data.size)}
                 className="remove"
               >
                 <span className="text-danger ml-20">

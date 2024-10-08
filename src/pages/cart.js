@@ -1,6 +1,12 @@
 "use client";
-import CartItems from "@/components/elements/CartItems";
-import Layout from "@/components/layout/Layout";
+import dynamic from "next/dynamic";
+
+const Layout = dynamic(() => import("@/components/layout/Layout"), {
+  ssr: false,
+});
+const CartItems = dynamic(() => import("@/components/elements/CartItems"), {
+  ssr: false,
+});
 import Link from "next/link";
 import { Fragment } from "react";
 import { useSelector } from "react-redux";
@@ -15,7 +21,7 @@ export default function Cart() {
   });
   return (
     <Fragment>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Cart">
+      <Layout headerStyle={3} footerStyle={1}>
         <section
           className="cart-area pt-80 pb-80 wow fadeInUp"
           data-wow-duration=".8s"
@@ -40,37 +46,7 @@ export default function Cart() {
                     </tbody>
                   </table>
                 </div>
-                <div className="row">
-                  <div className="col-12">
-                    <div className="coupon-all">
-                      <div className="coupon">
-                        <input
-                          id="coupon_code"
-                          className="input-text"
-                          name="coupon_code"
-                          placeholder="Coupon code"
-                          type="text"
-                        />
-                        <button
-                          className="tp-btn tp-color-btn banner-animation"
-                          name="apply_coupon"
-                          type="submit"
-                        >
-                          Apply Coupon
-                        </button>
-                      </div>
-                      <div className="coupon2">
-                        <button
-                          className="tp-btn tp-color-btn banner-animation"
-                          name="update_cart"
-                          type="submit"
-                        >
-                          Update cart
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
                 <div className="row justify-content-end">
                   <div className="col-md-5 ">
                     <div className="cart-page-total">
@@ -87,7 +63,7 @@ export default function Cart() {
                         href="/checkout"
                         className="tp-btn tp-color-btn banner-animation"
                       >
-                        Proceed to Checkout
+                        Passer à la caisse{" "}
                       </Link>
                     </div>
                   </div>

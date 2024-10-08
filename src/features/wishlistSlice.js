@@ -25,24 +25,53 @@ export const shopSlice = createSlice({
       localStorage.setItem("local-wishlist", JSON.stringify(state.wishlist));
     },
     addWishlistWithSize: (state, { payload }) => {
+      const { item, size } = payload.product;
+
+      // Check if the product with the specific size already exists in the wishlist
       const isWishlistExist = state.wishlist.some(
-        (item) => item.id === payload.product.item.id
+        (wishlistItem) =>
+          wishlistItem.item.id === item.id && wishlistItem.size === size
       );
+
       if (!isWishlistExist) {
         state.wishlist.push({
-          ...payload.product,
+          ...payload.product, // Add item to the wishlist with size
         });
         toast.success("This item added to Wishlist.");
       } else {
-        toast.error("This item is already in the Wishlist.");
+        toast.warn("This item with the same size is already in the Wishlist.");
       }
+
+      // Save the updated wishlist to localStorage
       localStorage.setItem("local-wishlist", JSON.stringify(state.wishlist));
     },
 
     deleteWishlist: (state, { payload }) => {
-      state.wishlist = state.wishlist.filter((item) => item.id !== payload);
+      const { id, size } = payload;
+
+      // Find the item in the wishlist before removing it
+      const itemToDelete = state.wishlist.find(
+        (wishlistItem) =>
+          wishlistItem.item.id === id && wishlistItem.size === size
+      );
+
+      // Filter out the specific item with the matching id and size
+      state.wishlist = state.wishlist.filter(
+        (wishlistItem) =>
+          !(wishlistItem.item.id === id && wishlistItem.size === size)
+      );
+
+      // Update local storage
       localStorage.setItem("local-wishlist", JSON.stringify(state.wishlist));
-      toast.error(`Item ${payload} has been deleted.`);
+
+      // Notify with the item name and size if item exists
+      if (itemToDelete) {
+        toast.error(
+          `Item ${itemToDelete.item.name} with size ${size} has been deleted from the Wishlist.`
+        );
+      } else {
+        toast.error(`Item with size ${size} not found in the Wishlist.`);
+      }
     },
     addQty: (state, { payload }) => {
       state.wishlist = state.wishlist.filter((item) => {

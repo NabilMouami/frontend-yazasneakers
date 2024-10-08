@@ -1,9 +1,8 @@
 "use client";
 
-import { addQty, deleteCart } from "@/features/shopSlice";
+import { deleteCart } from "@/features/shopSlice";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { config_url } from "@/util/config";
 import { Fragment, useMemo } from "react";
 
 export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
@@ -47,10 +46,7 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                   <li key={i}>
                     <div className="tpcart__item">
                       <div className="tpcart__img">
-                        <img
-                          src={`${config_url}/images/${data.item.image}`}
-                          alt=""
-                        />
+                        <img src={data.item.image} alt="" />
                         <div
                           className="tpcart__del"
                           onClick={() =>
@@ -63,9 +59,27 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                         </div>
                       </div>
                       <div className="tpcart__content">
-                        <span className="tpcart__content-title">
-                          <Link href="/shop-details">{data.item.name}</Link>
-                        </span>
+                        <div className="d-flex justify-content-center align-items-center">
+                          <span className="tpcart__content-title">
+                            <Link
+                              href={`/produits/${data.item.name_by_filtered}`}
+                            >
+                              {data.item.name}
+                            </Link>
+                          </span>
+                          <span
+                            className="btn btn-sm btn-dark text-white ml-20"
+                            style={{
+                              borderRadius: "25px",
+                              padding: "0.25rem 0.3rem",
+                              fontSize: "0.5rem",
+                              cursor: "pointer", // Disable cursor if blocked
+                            }}
+                          >
+                            {data.size}
+                          </span>
+                        </div>
+
                         <div className="tpcart__cart-price">
                           <span className="new-price">
                             {data.item.price_promo !== 0

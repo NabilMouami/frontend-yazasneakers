@@ -12,46 +12,12 @@ export default function Sidebar({ isMobileMenu, handleMobileMenu }) {
           <i className="fal fa-times ml-10" />
         </button>
         <div className="tpsideinfo__search text-center pt-35">
-          <span className="tpsideinfo__search-title mb-20">
-            What Are You Looking For?
-          </span>
-          <form action="#">
-            <input type="text" placeholder="Search Products..." />
-            <button>
-              <i className="fal fa-search" />
-            </button>
-          </form>
+          <span className="tpsideinfo__search-title mb-20"></span>
         </div>
         <div className="tpsideinfo__nabtab">
           <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link active"
-                id="pills-home-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-home"
-                type="button"
-                role="tab"
-                aria-controls="pills-home"
-                aria-selected="true"
-              >
-                Produits
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="pills-profile-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-profile"
-                type="button"
-                role="tab"
-                aria-controls="pills-profile"
-                aria-selected="false"
-              >
-                Categories
-              </button>
-            </li>
+            <li className="nav-item" role="presentation"></li>
+            <li className="nav-item" role="presentation"></li>
           </ul>
           <div className="tab-content" id="pills-tabContent">
             <div
@@ -63,44 +29,7 @@ export default function Sidebar({ isMobileMenu, handleMobileMenu }) {
             >
               <MobileMenu />
             </div>
-            <div
-              className="tab-pane fade"
-              id="pills-profile"
-              role="tabpanel"
-              aria-labelledby="pills-profile-tab"
-              tabIndex={0}
-            >
-              <div className="tpsidebar-categories">
-                <ul>
-                  <li>
-                    <Link href="/shop">Furniture</Link>
-                  </li>
-                  <li>
-                    <Link href="/shop">Wooden</Link>
-                  </li>
-                  <li>
-                    <Link href="/shop">Lifestyle</Link>
-                  </li>
-                  <li>
-                    <Link href="/shop">Shopping</Link>
-                  </li>
-                  <li>
-                    <Link href="/track">Track Product</Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
           </div>
-        </div>
-        <div className="tpsideinfo__account-link">
-          <Link href="/sign-in">
-            <i className="fal fa-user" /> Login / Register
-          </Link>
-        </div>
-        <div className="tpsideinfo__wishlist-link">
-          <Link href="/wishlist" target="_parent">
-            <i className="fal fa-heart" /> Wishlist
-          </Link>
         </div>
       </div>
       <div

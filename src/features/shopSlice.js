@@ -24,26 +24,50 @@ export const shopSlice = createSlice({
       localStorage.setItem("local-cart", JSON.stringify(state.cart));
     },
     addCartWithSize: (state, { payload }) => {
+      const { item, size } = payload.product;
+
+      // Check if the product with the specific size already exists in the cart
       const isCartExist = state.cart.some(
-        (item) => item.id === payload.product.item.id
+        (cartItem) => cartItem.item.id === item.id && cartItem.size === size
       );
+
       if (!isCartExist) {
         state.cart.push({
           ...payload.product,
+          // qty is not added or modified
         });
         toast.success("This item added to cart.");
       } else {
-        toast.error("This item is already in the cart.");
+        toast.warn("This item with the same size is already in the cart.");
       }
+
+      // Save the updated cart to localStorage
       localStorage.setItem("local-cart", JSON.stringify(state.cart));
     },
     deleteCart: (state, { payload }) => {
       const { id, size } = payload;
+
+      // Find the item in the cart before removing it
+      const itemToDelete = state.cart.find(
+        (data) => data.item.id === id && data.size === size
+      );
+
+      // Remove the item from the cart
       state.cart = state.cart.filter(
         (data) => !(data.item.id === id && data.size === size)
       );
+
+      // Update local storage
       localStorage.setItem("local-cart", JSON.stringify(state.cart));
-      toast.error(`Item ${id} with size ${size} has been deleted.`);
+
+      // Notify with the item name and size if item exists
+      if (itemToDelete) {
+        toast.error(
+          `Item ${itemToDelete.item.name} with size ${size} has been deleted.`
+        );
+      } else {
+        toast.error(`Item with size ${size} not found in the cart.`);
+      }
     },
     addQty: (state, { payload }) => {
       state.cart = state.cart.filter((item) => {

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import CartShow from "../elements/CartShow";
 import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "@/features/customerSlice";
+import { useRouter } from "next/router";
+
 export default function HeaderMobSticky({
   scroll,
   isMobileMenu,
@@ -8,6 +12,15 @@ export default function HeaderMobSticky({
   isCartSidebar,
   handleCartSidebar,
 }) {
+  const { customerInfo } = useSelector((state) => state.Customer) || {};
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const Logout = async () => {
+    await localStorage.removeItem("token");
+    await dispatch(logout());
+    await router.push("/");
+  };
+
   return (
     <>
       <div
@@ -25,18 +38,61 @@ export default function HeaderMobSticky({
                 </button>
               </div>
             </div>
-            <div className="col-6">
+            <div className="col-6 d-flex justify-content-center align-items-center">
               <div className="logo text-center">
                 <Link href="/">
                   <Image
                     src="/assets/img/logo/logo.webp"
                     alt="yazasneakers"
-                    height={50}
-                    width={50}
+                    height={70}
+                    width={70}
                   />
                 </Link>
               </div>
+              {customerInfo && Object.keys(customerInfo).length !== 0 && (
+                <div className="header-meta__search-5">
+                  <div className="header-meta__lang">
+                    <ul className="font-small">
+                      <li>
+                        <a>
+                          <i className="fal fa-user" />
+                          {customerInfo.firstName} {customerInfo.lastName}
+                          <span>
+                            <i className="fal fa-angle-down" />
+                          </span>
+                        </a>
+                        <ul className="header-meta__lang-submenu">
+                          <li onClick={() => Logout()}>
+                            <i className="fa fa-sign-out-alt text-success"></i>
+                            Logout
+                          </li>
+                          <li>
+                            {" "}
+                            <img
+                              width="20"
+                              height="20"
+                              src="/assets/img/logo/coins.png"
+                            />{" "}
+                            {customerInfo?.balance} Coins
+                          </li>
+                          <li>
+                            <i className="fa fa-receipt text-success"></i>
+
+                            <Link href="/my-orders"> My-Orders</Link>
+                          </li>
+                          <li>
+                            <i className="fal fa-user" />
+
+                            <Link href="/my-account"> My-Account</Link>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
+
             <div className="col-3">
               <div className="header-meta-info d-flex align-items-center justify-content-end ml-25">
                 <div className="header-meta m-0 d-flex align-items-center">
@@ -48,9 +104,11 @@ export default function HeaderMobSticky({
                       <i className="fal fa-shopping-cart" />
                       <CartShow />
                     </button>
-                    <Link href="/sign-in">
-                      <i className="fal fa-user" />
-                    </Link>
+                    {customerInfo && Object.keys(customerInfo).length === 0 && (
+                      <Link href="/sign-in">
+                        <i className="fal fa-user" />
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

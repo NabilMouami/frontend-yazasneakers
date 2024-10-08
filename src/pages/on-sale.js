@@ -9,6 +9,7 @@ import FilterSidebar from "@/components/shop/FilterSidebar";
 import { Fragment, useState, useEffect } from "react";
 import Preloader from "@/components/elements/Preloader";
 import FilterDataOnSale from "@/components/shop/FilterDataOnSale";
+import FilterSidebarGenre from "@/components/shop/FilterSidebarGenre";
 
 function OnSale({ initialData }) {
   const [data, setData] = useState(initialData || []); // Set initialData from SSR
@@ -20,15 +21,37 @@ function OnSale({ initialData }) {
     if (filters.sizes.length > 0) {
       filtered = filtered.filter((product) => {
         const productSizes = JSON.parse(product.nemuro_shoes);
-        return filters.sizes.some((size) => productSizes.includes(size));
+
+        // Extract size numbers from filters.sizes (ignoring counts in parentheses)
+        const selectedSizes = filters.sizes.map((size) => size.split(" ")[0]);
+
+        return selectedSizes.some((size) => productSizes.includes(size));
+      });
+    }
+    if (filters.category.length > 0) {
+      // Ensure unique categories from the filter
+      const uniqueCategories = Array.from(new Set(filters.category));
+
+      // Filter products based on unique categories
+      filtered = filtered.filter((product) => {
+        // Handle cases where the category may be null
+        if (!product.category) {
+          return false;
+        }
+
+        // Split the product categories if they are comma-separated
+        const productCategories = product.category
+          .toLowerCase() // Normalize to lower case for comparison
+          .split(",") // Split into an array if it's a comma-separated string
+          .map((cat) => cat.trim()); // Trim whitespace
+
+        // Check if any of the unique categories are included in the product categories
+        return uniqueCategories.some((category) =>
+          productCategories.includes(category.toLowerCase())
+        );
       });
     }
 
-    if (filters.category.length > 0) {
-      filtered = filtered.filter((product) =>
-        filters.category.includes(product.category_names)
-      );
-    }
     if (filters.genre.length > 0) {
       console.log("Genre Filters:", filters.genre);
 
@@ -61,43 +84,46 @@ function OnSale({ initialData }) {
 
     setFilteredJobs(filtered);
   };
-
   return (
     <Fragment>
       <Head>
-        <title>{`Shop  Products | Your Store Name`}</title>
+        <title>{`Shop Sales Products | At Yazasneakers`}</title>
         <meta
           name="description"
-          content={`Browse our wide selection of products. Shop now for the best deals on`}
+          content={`Discover our wide selection of products on sale. Shop now for the best deals on shoes accessories.`}
         />
-        <meta property="og:title" content={`Shop  Products`} />
+        <meta property="og:title" content={`Shop Sales Products`} />
         <meta
           property="og:description"
-          content={`Browse  products and get the best deals.`}
+          content={`Discover products on sale and get the best deals on shoes and accessories.`}
         />
-        <meta property="og:image" content="https://your-image-url.com" />
         <meta
-          property="og:url"
-          content={`https://your-site.com/produit/category`}
+          property="og:image"
+          content="https://your-image-url.com/sales.jpg"
         />
+        <meta property="og:url" content={`https://your-site.com/on-sale`} />
       </Head>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop">
+
+      <Layout headerStyle={3} footerStyle={1}>
         <div className="product-area pt-70 pb-20">
           <div className="container">
             <div className="row">
+              <div className="col-lg-2 col-md-12">
+                <div className="tpsidebar product-sidebar__product-category">
+                  <FilterSidebarGenre
+                    onFilterChange={handleFilterChange}
+                    data={initialData}
+                  />{" "}
+                </div>
+              </div>
               <div className="col-lg-10 col-md-12">
                 <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
                   <FilterDataOnSale
-                    showItem={5}
+                    showItem={20}
                     style={1}
                     showPagination
                     filterData={filteredJobs}
                   />
-                </div>
-              </div>
-              <div className="col-lg-2 col-md-12">
-                <div className="tpsidebar product-sidebar__product-category">
-                  <FilterSidebar onFilterChange={handleFilterChange} />
                 </div>
               </div>
             </div>

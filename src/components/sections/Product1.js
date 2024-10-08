@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { loadAllProducts } from "@/features/productsSlice";
 import axios from "axios";
 import { config_url } from "@/util/config";
+import WhiteProduct from "./WhiteProduct";
 
 export default function Product1() {
   const { categoryList } = useSelector((state) => state.Categories) || {};
@@ -50,30 +51,12 @@ export default function Product1() {
                   <span>
                     {" "}
                     Products{" "}
-                    <img src="/assets/img/icon/title-shape-01.jpg" alt="" />
+                    <img
+                      src="/assets/img/icon/title-shape-01.jpg"
+                      alt="underline-logo"
+                    />
                   </span>
                 </h4>
-              </div>
-            </div>
-            <div className="col-md-6 col-12">
-              <div className="tpnavbar">
-                <nav>
-                  <div className="nav nav-tabs" id="nav-tab" role="tablist">
-                    {categoryList?.map((item) => (
-                      <button
-                        key={item.id}
-                        className={
-                          activeCategory === item.id
-                            ? "nav-link active"
-                            : "nav-link"
-                        }
-                        onClick={() => handleOnClick(item.id, item.name)}
-                      >
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
-                </nav>
               </div>
             </div>
           </div>
@@ -84,7 +67,7 @@ export default function Product1() {
               role="tabpanel"
               aria-labelledby="nav-category-tab"
             >
-              <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2"></div>
+              <WhiteProduct />
             </div>
           </div>
         </div>

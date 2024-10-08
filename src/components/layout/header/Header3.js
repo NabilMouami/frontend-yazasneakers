@@ -11,7 +11,7 @@ import HeaderMobSticky from "../HeaderMobSticky";
 import HeaderSticky from "../HeaderSticky";
 import HeaderTabSticky from "../HeaderTabSticky";
 import { loadAllCategories } from "@/features/categorySlice";
-import { searchProducts } from "@/features/productsSlice";
+import { searchProducts, loadAllProducts } from "@/features/productsSlice";
 
 export default function Header3({
   scroll,
@@ -37,7 +37,15 @@ export default function Header3({
       await setAllCollections(res.data);
     });
   }, []);
-
+  useEffect(() => {
+    try {
+      axios.get(`${config_url}/api/products`).then(async (res) => {
+        await dispatch(loadAllProducts(res.data));
+      });
+    } catch (error) {
+      console.error("Failed to fetch product:", error);
+    }
+  }, []);
   const handleSearch = (e) => {
     const value = e.target.value;
     setQuery(value);
@@ -48,15 +56,14 @@ export default function Header3({
     <>
       <header>
         <div className="header-top tertiary-header-top space-bg">
-          <div className="container">
+          <div className="container-fluid">
             <div className="row">
               <div className="col-xl-7 col-lg-12 col-md-12 ">
                 <div className="header-welcome-text">
-                  <span>
-                    Bienvenue dans notre boutique Yazasneakrz! Profitez de la
-                    livraison gratuite sur vos commandes.
+                  <span className="mr-10">
+                    Livraison gratuite pour les commandes supérieures à 1000Dh
                   </span>
-                  <Link href="/shop">
+                  <Link href="/collections/sneakers">
                     Achetez maintenant <i className="fal fa-long-arrow-right" />
                   </Link>
                 </div>
@@ -67,19 +74,31 @@ export default function Header3({
                     <ul>
                       <li>
                         <Link href="/sign-in">
-                          <i className="fal fa-user" /> Account
+                          <i className="fal fa-user" /> Compte
                         </Link>
                       </li>
                     </ul>
                   </div>
                   <div className="menu-top-social">
-                    <Link href="#">
+                    <Link
+                      href="https://www.facebook.com/yazasnkrz/"
+                      target="_blank"
+                    >
+                      {" "}
                       <i className="fab fa-facebook-f" />
                     </Link>
-                    <Link href="#">
+                    <Link
+                      href="https://www.instagram.com/yaza_snkrz/"
+                      target="_blank"
+                    >
+                      {" "}
                       <i className="fab fa-instagram" />
                     </Link>
-                    <Link href="#">
+                    <Link
+                      href="https://www.tiktok.com/@yaza_snkrz"
+                      target="_blank"
+                    >
+                      {" "}
                       <i className="fab fa-tiktok" />
                     </Link>
                   </div>
@@ -90,25 +109,12 @@ export default function Header3({
         </div>
 
         <div className="logo-area green-logo-area mt-30 d-none d-xl-block">
-          <div className="container-fluid">
-            <div className="row align-items-center">
-              <div className="col-xl-2 col-lg-3">
-                <div className="logo">
-                  <Link href="/">
-                    <Image
-                      src="/assets/img/logo/logo.webp"
-                      alt="yazasneakers"
-                      height={100}
-                      width={100}
-                    />
-                  </Link>
-                </div>{" "}
-              </div>
-
-              <div className="col-xl-10 col-lg-9">
-                <div className="header-meta-info d-flex align-items-center justify-content-between">
+          <div className="container">
+            <div className="row">
+              <div className="col-xl-12 col-lg-9">
+                <div className="d-flex align-items-center justify-content-between">
                   <div className="header-search-bar">
-                    <form action="#">
+                    <form>
                       <div className="search-info p-relative">
                         <button className="header-search-icon">
                           <i className="fal fa-search" />
@@ -121,6 +127,7 @@ export default function Header3({
                         />
                       </div>
                     </form>
+
                     <div style={{ zIndex: 9999 }} className="position-relative">
                       {isDropdownVisible && (
                         <div className="position-absolute bg-white w-100 mt-2 shadow-lg border rounded">
@@ -135,17 +142,17 @@ export default function Header3({
                                   <Image
                                     width={50}
                                     height={50}
-                                    src={`${config_url}/images/${product?.image}`}
+                                    src={product?.image}
                                     alt={product.meta_image}
                                     className="w-10 h-10 object-cover me-3"
                                   />
                                   <div>
                                     <div className="fw-semibold">
-                                      <Link
+                                      <a
                                         href={`/produits/${product?.name_by_filtered}`}
                                       >
                                         {product.name}
-                                      </Link>
+                                      </a>
                                     </div>
                                   </div>
                                 </div>
@@ -165,24 +172,37 @@ export default function Header3({
                       )}
                     </div>
                   </div>
-                  <ul className="cat-menu__list d-flex align-items-center">
-                    <li>
-                      <Link className="fw-bolder" href="/genre/homme">
-                        Homme
+                  <div className="col-xl-1 col-lg-3 ml-30">
+                    <div className="logo">
+                      <Link href="/">
+                        <Image
+                          src="/assets/img/logo/logo.webp"
+                          alt="yazasneakers"
+                          height={100}
+                          width={100}
+                        />
                       </Link>
+                    </div>{" "}
+                  </div>
+
+                  <ul className="cat-menu__list d-flex align-items-center ml-50 mr-50">
+                    <li>
+                      <a className="fw-bolder" href="/genre/homme">
+                        Hommes
+                      </a>
                     </li>
                     <li>
-                      <Link className="fw-bolder" href="/genre/femme">
-                        Femme
-                      </Link>
+                      <a className="fw-bolder" href="/genre/femme">
+                        Femmes
+                      </a>
                     </li>
                     <li>
-                      <Link className="fw-bolder" href="/genre/enfant">
+                      <a className="fw-bolder" href="/genre/enfant">
                         Enfants
-                      </Link>
+                      </a>
                     </li>
                   </ul>
-                  <div className="header-meta header-brand d-flex align-items-center mr-20">
+                  <div className="header-meta header-brand d-flex align-items-center">
                     <div className="header-meta__social d-flex align-items-center gap-2">
                       <button
                         className="header-cart p-relative tp-cart-toggle"
@@ -208,7 +228,7 @@ export default function Header3({
             </div>
           </div>
         </div>
-        <div className="main-menu-area tertiary-main-menu mt-40 d-none d-xl-block ml-40 mr-40 mb-5">
+        <div className="main-menu-area tertiary-main-menu mt-30 d-none d-xl-block ml-40 mr-40 mb-5">
           <div className="container-fluid">
             <div className="row align-items-center">
               <div className="col-xl-2 col-lg-3 mt-10">
@@ -226,7 +246,7 @@ export default function Header3({
                         <li key={item.id}>
                           <Link href={`/collections/${item.name}`}>
                             <Image
-                              src={`${config_url}/categories/${item.image}`}
+                              src={item.image}
                               alt={item.meta_image}
                               width={40}
                               height={40}
@@ -245,23 +265,23 @@ export default function Header3({
                   <nav id="mobile-menu">
                     <ul>
                       <li className="ml-60">
-                        <Link href="/new">New</Link>
+                        <a href="/new">New</a>
                       </li>
                       <li className="ml-60">
-                        <Link href="/collections/sneakers">Sneakers</Link>
+                        <a href="/collections/sneakers">Sneakers</a>
                       </li>
                       <li className="ml-60">
-                        <Link href="/collections/accessoire">Accessoires</Link>
+                        <a href="/collections/accessoire">Accessoires</a>
                       </li>
                       <li className="ml-60">
-                        <Link href="/on-sale">Sale</Link>
+                        <a href="/on-sale">Sale</a>
                       </li>
                       <li className="ml-60">
-                        <Link href="/blog">Blog</Link>
+                        <a href="/blog">Blog</a>
                       </li>
 
                       <li className="ml-60">
-                        <Link href="/cart">Cart</Link>
+                        <a href="/cart">Cart</a>
                       </li>
                     </ul>
                   </nav>

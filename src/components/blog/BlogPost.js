@@ -1,8 +1,6 @@
 "use client";
-import React, { Fragment, useState, useEffect } from "react";
-import axios from "axios";
-import { config_url } from "@/util/config";
-import data from "../../util/blog.json";
+import React, { useState, useEffect } from "react";
+
 import BlogCard1 from "./BlogCard1";
 import Pagination from "./Pagination";
 export default function BlogPost({ style, blogs, showItem, showPagination }) {

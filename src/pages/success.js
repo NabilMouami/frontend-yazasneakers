@@ -25,36 +25,41 @@ const SuccessPage = () => {
   }, [cart]);
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center vh-100">
-      <Stack spacing={2} useFlexGap>
-        <Typography variant="h1">📦</Typography>
-        <Typography variant="h5">Merci pour votre commande !</Typography>
-        <Typography variant="body1" color="text.secondary">
-          Nous vous avons envoyé un e-mail de confirmation de votre commande et
-          vous tiendrons au courant dès qu'elle sera expédiée.
-        </Typography>
+    <div className="container d-flex flex-column align-items-center justify-content-center">
+      <div className="d-flex flex-column gap-3 align-items-center justify-content-center text-center">
+        <Stack spacing={2} useFlexGap>
+          <Typography variant="h1">📦</Typography>
+          <Typography variant="h5">Merci pour votre commande !</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Nous vous avons envoyé un e-mail de confirmation de votre commande
+            et vous tiendrons au courant dès qu'elle sera expédiée.
+          </Typography>
+        </Stack>
+      </div>
+      <div className="d-flex flex-column gap-3 align-items-center justify-content-center text-center mt-30">
         <Button
           variant="contained"
           sx={{
-            alignSelf: "start",
+            alignSelf: { xs: "center", sm: "start" },
             width: { xs: "100%", sm: "auto" },
           }}
         >
           <Link href="/my-orders">Accéder à mes commandes</Link>
         </Button>
-      </Stack>
-      <div className="d-flex flex-column gap-3 align-items-center justify-content-center">
-        <Confetti width={2000} height={1000} />
+      </div>
+
+      <div className="w-100 d-flex flex-column gap-3 align-items-center justify-content-center text-center">
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
         <h1 className="text-success display-1">Successful</h1>
         <h2 className="h4 fw-bold">
           Nous vous avons envoyé la facture par e-mail
         </h2>
-        <h2 className="h4 fw-bold">Vous gagner {total / 2.5} Coins. </h2>
+        <h2 className="h4 fw-bold">Vous gagnez {total / 2.5} Coins.</h2>
         <Alert severity="info">
-          Coins est disponible 30 jours après le paiement.
+          Les Coins seront disponibles 30 jours après le paiement.
         </Alert>
 
-        <h3 className="">Vous êtes redirigé vers la page de commande...</h3>
+        <h3>Vous êtes redirigé vers la page de commande...</h3>
       </div>
     </div>
   );

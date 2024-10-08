@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import Image from "next/image";
-import { config_url } from "@/util/config";
 
 export default function MobileMenu() {
   const { categoryList } = useSelector((state) => state.Categories) || {};
@@ -39,90 +37,84 @@ export default function MobileMenu() {
           <nav className="mean-nav">
             <ul>
               <li className="has-dropdown">
-                <Link href="/">Home</Link>
+                <a>Categories</a>
                 <ul
                   className="submenu"
                   style={{ display: `${isActive.key == 1 ? "block" : "none"}` }}
                 >
-                  <li>
-                    <Link href="/">Wooden Home</Link>
-                  </li>
-                  <li>
-                    <Link href="/index-2">Fashion Home</Link>
-                  </li>
-                  <li>
-                    <Link href="/index-3">Furniture Home</Link>
-                  </li>
-                  <li>
-                    <Link href="/index-4">Cosmetics Home</Link>
-                  </li>
-                  <li>
-                    <Link href="/index-5">Food Grocery</Link>
-                  </li>
-                </ul>
-                <Link
-                  className="mean-expand"
-                  onClick={() => handleClick(1)}
-                  href="#"
-                  style={{ fontSize: 18 }}
-                >
-                  <i className="fal fa-plus" />
-                </Link>
-              </li>
-              <li className="has-dropdown">
-                <Link href="/shop">Categories</Link>
-                <ul
-                  className="submenu"
-                  style={{ display: `${isActive.key == 2 ? "block" : "none"}` }}
-                >
                   {categoryList?.map((item) => (
                     <li key={item.id}>
                       <Link href={`/collections/${item.name}`}>
-                        <span>{item.name}</span>
+                        <span className="submenu-items">{item.name}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-                <Link
+                <a
                   className="mean-expand"
-                  onClick={() => handleClick(2)}
-                  href="#"
+                  onClick={() => handleClick(1)}
                   style={{ fontSize: 18 }}
                 >
-                  <i className="fal fa-plus" />
-                </Link>
+                  <i
+                    className={`fal fa-${
+                      isActive.key === 1 ? "minus" : "plus"
+                    }`}
+                  />
+                </a>
+              </li>
+              <li className="has-dropdown">
+                <a>Genres</a>
+                <ul
+                  className="submenu"
+                  style={{ display: `${isActive.key == 2 ? "block" : "none"}` }}
+                >
+                  <li>
+                    <Link href="/genre/homme">
+                      <span className="submenu-items">Hommes</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/genre/femme">
+                      <span className="submenu-items">Femmes</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/genre/enfant">
+                      <span className="submenu-items">Enfants</span>
+                    </Link>
+                  </li>
+                </ul>
+                <a
+                  className="mean-expand"
+                  onClick={() => handleClick(2)}
+                  style={{ fontSize: 18 }}
+                >
+                  <i
+                    className={`fal fa-${
+                      isActive.key === 2 ? "minus" : "plus"
+                    }`}
+                  />
+                </a>
               </li>
               <li>
                 <Link href="/on-sale">Sales</Link>
               </li>
-              <li className="has-dropdown">
-                <Link href="/blog">Blog</Link>
-                <ul
-                  className="submenu"
-                  style={{ display: `${isActive.key == 4 ? "block" : "none"}` }}
-                >
-                  <li>
-                    <Link href="/blog">Blog</Link>
-                  </li>
-                  <li>
-                    <Link href="/blog-details">Blog Details</Link>
-                  </li>
-                </ul>
-                <Link
-                  className="mean-expand"
-                  onClick={() => handleClick(4)}
-                  href="#"
-                  style={{ fontSize: 18 }}
-                >
-                  <i className="fal fa-plus" />
-                </Link>
-              </li>
-              <li className="mean-last">
-                <Link href="/shop">Shop</Link>
+              <li>
+                <Link href="/new">New Arrival</Link>
               </li>
 
               <li className="mean-last">
-                <Link href="/contact">Contact</Link>
+                <Link href="/collections/sneakers">Sneakers</Link>
+              </li>
+
+              <li className="mean-last">
+                <Link href="/collections/accessoire">Accessoires</Link>
+              </li>
+              <li>
+                <Link href="/blog">Blog</Link>
+              </li>
+              <li>
+                <Link href="/contact">Contact us</Link>
               </li>
             </ul>
           </nav>

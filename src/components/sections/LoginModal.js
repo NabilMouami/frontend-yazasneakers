@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { loadCustomer } from "@/features/customerSlice";
-
 import { config_url } from "@/util/config";
 import OtpInput from "react-otp-input";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -21,28 +17,43 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepButton from "@mui/material/StepButton";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { green } from "@mui/material/colors";
+
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-const defaultTheme = createTheme();
 const steps = ["Créer un compte", "Vérifier l'OTP", "Se connecter"];
 
-export default function LoginModal() {
+export default function LoginModal({
+  setNom,
+  setPreNom,
+  setEmail,
+  setTelephone,
+  setOpen,
+  open,
+}) {
   const { customerInfo } = useSelector((state) => state.Customer) || {};
-  const [open, setOpen] = React.useState(false);
   const [otp, setOtp] = useState("");
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [completed, setCompleted] = React.useState({});
+  const [activeStep, setActiveStep] = useState(0);
+  const [completed, setCompleted] = useState({});
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
+    telephone: "",
   });
   const dispatch = useDispatch();
-  const router = useRouter();
-
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: green[700], // You can change this to any shade of green
+      },
+    },
+  });
   const handleNext = () => {
     if (activeStep === 0 && Object.keys(completed).length === 0) {
       alert("You need to create an account first.");
@@ -51,19 +62,11 @@ export default function LoginModal() {
     setActiveStep((prevStep) => prevStep + 1);
   };
 
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
   const handleComplete = () => {
     const newCompleted = completed;
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);
     handleNext();
-  };
-
-  const handleClickOpen = () => {
-    setOpen(true);
   };
 
   const handleClose = () => {
@@ -86,17 +89,41 @@ export default function LoginModal() {
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
+
+    const trimmedValues = {
+      firstName: formValues.firstName.trim(),
+      lastName: formValues.lastName.trim(),
+      email: formValues.email.trim(),
+      password: formValues.password.trim(),
+      telephone: formValues.telephone.trim(),
+    };
+
+    if (
+      !trimmedValues.firstName ||
+      !trimmedValues.lastName ||
+      !trimmedValues.email ||
+      !trimmedValues.password ||
+      !trimmedValues.telephone
+    ) {
+      toast.error("All fields are required!");
+      return;
+    }
+
     try {
       await axios.post(`${config_url}/api/customers`, {
-        firstName: formValues.firstName,
-        lastName: formValues.lastName,
-        email: formValues.email,
-        password: formValues.password,
+        firstName: trimmedValues.firstName,
+        lastName: trimmedValues.lastName,
+        email: trimmedValues.email,
+        password: trimmedValues.password,
+        telephone: trimmedValues.telephone,
       });
-      setCompleted({ 0: true }); // Mark step 0 as complete
-      setActiveStep(1); // Move to the OTP verification step
+      // Mark step 0 as complete and move to step 1
+      setCompleted({ ...completed, 0: true });
+      setActiveStep(1);
+      toast.success("Account created successfully! Please verify your OTP.");
     } catch (error) {
       console.error("Error creating account:", error);
+      toast.error("Error creating account. Please try again.");
     }
   };
 
@@ -107,8 +134,10 @@ export default function LoginModal() {
         otp,
       });
       handleComplete();
+      toast.success("OTP verified successfully!");
     } catch (error) {
       console.error("Error verifying OTP:", error);
+      toast.error("Invalid OTP. Please try again.");
     }
   };
 
@@ -120,15 +149,21 @@ export default function LoginModal() {
       });
       if (response.data.token) {
         Cookies.set("token", response.data.token);
-        router.reload();
         dispatch(loadCustomer(response.data.results));
+        setNom(response.data.results.firstName);
+        setPreNom(response.data.results.lastName);
+        setEmail(response.data.results.email);
+        setTelephone(response.data.results.telephone);
         handleComplete();
         setOpen(false);
+        toast.success("Logged in successfully!");
       }
     } catch (error) {
       console.error("Error during login:", error);
+      toast.error("Error logging in. Please check your credentials.");
     }
   };
+
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
@@ -177,7 +212,7 @@ export default function LoginModal() {
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   required
                   fullWidth
@@ -190,6 +225,19 @@ export default function LoginModal() {
                   onChange={handleInputChange}
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="given-name"
+                  name="telephone"
+                  required
+                  fullWidth
+                  id="telephone"
+                  label="Num Telephone"
+                  autoFocus
+                  value={formValues.telephone}
+                  onChange={handleInputChange}
+                />
+              </Grid>
             </Grid>
             <Button
               type="submit"
@@ -199,12 +247,11 @@ export default function LoginModal() {
             >
               Créer un compte
             </Button>
-            {/* Add the text link to go to "Se connecter" */}
             <Typography sx={{ mt: 2 }} align="center">
               Vous avez déjà un compte ?{" "}
               <span
                 style={{ color: "blue", cursor: "pointer" }}
-                onClick={() => setActiveStep(2)} // Navigate directly to step 3 (Se connecter)
+                onClick={() => setActiveStep(2)}
               >
                 Se connecter
               </span>
@@ -213,7 +260,15 @@ export default function LoginModal() {
         );
       case 1:
         return (
-          <Box sx={{ mt: 2 }}>
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "10px",
+            }}
+          >
             <Typography variant="h6">
               Entrez l'OTP envoyé à votre adresse e-mail
             </Typography>
@@ -268,49 +323,54 @@ export default function LoginModal() {
             >
               Se connecter
             </Button>
-            {/* Add the text link to go back to "Créer un compte" */}
-            <Typography sx={{ mt: 2 }} align="center">
-              Vous n'avez pas encore de compte ?{" "}
-              <span
-                style={{ color: "blue", cursor: "pointer" }}
-                onClick={() => setActiveStep(0)} // Navigate back to step 1 (Créer un compte)
-              >
-                Créer un compte
-              </span>
-            </Typography>
           </Box>
         );
       default:
-        return null;
+        return "Step inconnu";
     }
   };
 
   return (
-    <React.Fragment>
-      <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-      >
-        <DialogContent>
-          <Box sx={{ width: "100%" }}>
-            <Stepper nonLinear activeStep={activeStep}>
+    <>
+      <ToastContainer />
+      <ThemeProvider theme={theme}>
+        <Dialog
+          open={open}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={handleClose}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogContent sx={{ width: "auto" }}>
+            <Typography component="h1" variant="h5" align="center">
+              Connexion
+            </Typography>
+            <Stepper nonLinear activeStep={activeStep} sx={{ mt: 3 }}>
               {steps.map((label, index) => (
                 <Step key={label} completed={completed[index]}>
                   <StepButton
-                    disabled={index > 0 && !completed[index - 1]} // Disable steps if previous ones aren't completed
-                    onClick={() => setActiveStep(index)}
+                    color="inherit"
+                    onClick={() => {
+                      if (index === 1 && activeStep === 2) {
+                        toast.error(
+                          "You cannot go back to Step 2 after logging in!"
+                        );
+                      } else {
+                        setActiveStep(index);
+                      }
+                    }}
+                    disabled={index === 1 && activeStep === 2} // Disable Step 2 when on Step 3
                   >
                     {label}
                   </StepButton>
                 </Step>
               ))}
             </Stepper>
+
             {renderStepContent(activeStep)}
-          </Box>
-        </DialogContent>
-      </Dialog>
-    </React.Fragment>
+          </DialogContent>
+        </Dialog>
+      </ThemeProvider>
+    </>
   );
 }

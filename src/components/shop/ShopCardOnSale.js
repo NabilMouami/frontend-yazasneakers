@@ -6,71 +6,118 @@ import { config_url } from "@/util/config";
 import { addCartWithSize } from "@/features/shopSlice";
 import { addWishlistWithSize } from "@/features/wishlistSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const ShopCardOnSale = ({ item }) => {
   const { productList } = useSelector((state) => state.Products) || {};
 
   const [selectedSize, setSelectedSize] = useState(null);
-  const [selectsize, setSelected] = useState(true);
 
-  console.log(item);
   const dispatch = useDispatch();
 
-  const myArray = JSON.parse(item.nemuro_shoes);
+  const mySizes = JSON.parse(item.nemuro_shoes); // Sizes array
+  const myQuantities = JSON.parse(item.qty); // Quantities array
 
   const imagesArray = JSON.parse(item.images) || [];
   const validImages = [item.image, ...imagesArray].filter((image) => image);
 
   const images = {
-    img1: `${config_url}/images/${validImages[0]}`,
-    img2: `${config_url}/images/${validImages[1] || ""}`,
-    img3: `${config_url}/images/${validImages[2] || ""}`,
-    img4: `${config_url}/images/${validImages[3] || ""}`,
+    img1: `${validImages[0]}`,
+    img2: `${validImages[1] || ""}`,
+    img3: `${validImages[2] || ""}`,
+    img4: `${validImages[3] || ""}`,
   };
+
   const handleSelectedSize = (size) => {
     setSelectedSize(size);
-    setSelected(false);
   };
 
-  const createButton = (number, index) => (
-    <button
-      key={number}
-      onClick={() => handleSelectedSize(number)}
-      className={`btn btn-sm ${
-        selectedSize === number || (selectedSize === null && index === 0)
-          ? "btn-dark text-white"
-          : "btn-outline-secondary"
-      }`}
-      style={{
-        borderRadius: "25px",
-        padding: "0.25rem 0.3rem",
-        fontSize: "0.7rem",
-      }}
-    >
-      {number}
-    </button>
-  );
+  const createButton = (size, index, qty, type) => {
+    if (type === 1) return null;
+
+    const isBlocked = qty === "0"; // Check if quantity is 0
+    const nextAvailableIndex = mySizes.findIndex(
+      (s, i) => myQuantities[i] !== "0"
+    ); // Find the first available size index
+
+    return (
+      <button
+        key={size}
+        onClick={() => !isBlocked && handleSelectedSize(size)} // Disable click if blocked
+        className={`btn btn-sm ${
+          isBlocked
+            ? "btn-outline-secondary" // No background for blocked items
+            : selectedSize === size ||
+              (selectedSize === null && index === nextAvailableIndex)
+            ? "btn-dark text-white"
+            : "btn-outline-secondary"
+        }`}
+        style={{
+          borderRadius: "25px",
+          padding: "0.25rem 0.3rem",
+          fontSize: "0.7rem",
+          cursor: isBlocked ? "not-allowed" : "pointer", // Disable cursor if blocked
+          backgroundColor: isBlocked ? "" : "", // No background for blocked sizes
+          color: isBlocked ? "" : "", // No specific color for blocked sizes
+          textDecoration: isBlocked ? "line-through" : "none", // Add line-through if blocked
+        }}
+        disabled={isBlocked} // Disable button if qty is 0
+      >
+        {size}
+      </button>
+    );
+  };
+
+  const renderButtons = (sizes, qtys, type) => {
+    return sizes.map((size, index) =>
+      createButton(size, index, qtys[index], type)
+    );
+  };
+
+  const notify = (message) => toast.error(message);
 
   const addToCart = (id, size) => {
-    const myArray = JSON.parse(item.nemuro_shoes);
+    let size_final;
 
-    let size_final = size === null ? myArray[0] : size;
+    if (size === null || myQuantities[mySizes.indexOf(size)] === "0") {
+      // Find the first available size with quantity greater than 0
+      size_final =
+        mySizes.find((s) => myQuantities[mySizes.indexOf(s)] !== "0") || null; // Fallback to null if no size is available
+
+      if (!size_final) {
+        // Notify when no sizes are available
+        notify("No sizes available to add to the cart.");
+        return;
+      }
+    } else {
+      size_final = size; // Use the selected size if it's valid
+    }
+
     const item_fil = productList?.find((item) => item.id === id);
     const itemwithsize = { item: item_fil, size: size_final };
-    console.log(itemwithsize);
     dispatch(addCartWithSize({ product: itemwithsize }));
   };
-  const addToWishlist = (id, size) => {
-    const myArray = JSON.parse(item.nemuro_shoes);
 
-    let size_final = size === null ? myArray[0] : size;
+  const addToWishlist = (id, size) => {
+    let size_final;
+
+    if (size === null || myQuantities[mySizes.indexOf(size)] === "0") {
+      // Find the first available size with quantity greater than 0
+      size_final =
+        mySizes.find((s) => myQuantities[mySizes.indexOf(s)] !== "0") || null; // Fallback to null if no size is available
+
+      if (!size_final) {
+        // Notify when no sizes are available
+        notify("No sizes available to add to the wishlist.");
+        return;
+      }
+    } else {
+      size_final = size; // Use the selected size if it's valid
+    }
+
     const item_fil = productList?.find((item) => item.id === id);
     const itemwithsize = { item: item_fil, size: size_final };
     dispatch(addWishlistWithSize({ product: itemwithsize }));
-  };
-
-  const renderButtons = (sizes) => {
-    return sizes.map((number, index) => createButton(number, index));
   };
 
   const percentage = ((item?.price - item?.price_promo) / item?.price) * 100;
@@ -80,25 +127,32 @@ const ShopCardOnSale = ({ item }) => {
       <div className="col">
         <div className="tpproduct pb-15 mb-30">
           <div className="tpproduct__thumb p-relative">
+            {item.status_model === "new" && (
+              <span className="tpproduct__thumb-release">New</span>
+            )}
+            {item.status ? (
+              <span className="tpproduct__thumb-soldout">{item.status}</span>
+            ) : (
+              <></>
+            )}
+
             <span className="tpproduct__thumb-volt">
-              {percentage.toFixed(0)}%
+              -{percentage.toFixed(0)}%
             </span>
 
             <Link href={`/produits/${item.name_by_filtered}`}>
               <Image
-                width={300}
-                height={300}
+                width={250}
+                height={250}
                 src={images.img1}
-                alt="product-thumb"
+                alt={item.meta_image}
               />
               <Image
-                width={300}
-                height={300}
+                width={250}
+                height={250}
                 className="product-thumb-secondary"
                 src={images.img3}
-                alt="product-thumb-secondary"
-                layout="responsive"
-                objectFit="contain" // or "cover" based on your preference
+                alt={item.meta_image}
               />
             </Link>
             <div className="tpproduct__thumb-action">
@@ -121,7 +175,7 @@ const ShopCardOnSale = ({ item }) => {
           </div>
 
           <div className="tpproduct__content">
-            <h3 className="tpproduct__title">
+            <h3 className="tpproduct__title mt-20">
               <Link href={`/produits/${item.name_by_filtered}`}>
                 {item.name}
               </Link>
@@ -139,19 +193,10 @@ const ShopCardOnSale = ({ item }) => {
                   <del className="ml-10">{item.price}.00Dh</del>
                 )}
               </div>
-
-              <div className="mb-2 p-2 d-flex flex-column gap-2 me-2">
-                <div className="row row-cols-4 row-cols-md-4 row-cols-lg-4 g-2">
-                  {renderButtons(myArray)}
-                </div>
-              </div>
-
-              <div
-                className="tpproduct__cart"
-                onClick={() => addToCart(item.id)}
-              >
-                <i className="fal fa-shopping-cart" />
-                Add To Cart
+            </div>
+            <div className="mb-2 p-2 d-flex flex-column gap-2 me-2">
+              <div className="row row-cols-4 row-cols-md-4 row-cols-lg-4 g-2">
+                {renderButtons(mySizes, myQuantities, item.type)}
               </div>
             </div>
           </div>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 
 import { deleteCart } from "@/features/shopSlice";
-import { config_url } from "@/util/config";
 import Image from "next/image";
 
 const CartItems = () => {
@@ -25,7 +24,7 @@ const CartItems = () => {
           <tr className="cart-item" key={index}>
             <td className="product-thumbnail">
               <Image
-                src={`${config_url}/images/${data.item.image}`}
+                src={data.item.image}
                 alt="cart added product"
                 width={80}
                 height={80}
@@ -40,7 +39,11 @@ const CartItems = () => {
             <td className="product-name">
               <button
                 className="btn btn-sm btn-dark text-white"
-                style={{ borderRadius: "25px", padding: "0.25rem 0.75rem" }} // Smaller padding
+                style={{
+                  borderRadius: "25px",
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.6rem",
+                }} // Smaller padding
               >
                 {data.size}
               </button>

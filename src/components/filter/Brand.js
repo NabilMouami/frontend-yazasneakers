@@ -2,30 +2,36 @@
 
 import { useSelector } from "react-redux";
 
-const BrandLevel = ({ contract, setContract }) => {
-  const { categoryList } = useSelector((state) => state.Categories) || {};
+const BrandLevel = ({ data, contract, setContract }) => {
+  // Extract unique categories, handling multi-category strings and null values
+  const uniqueCategories = Array.from(
+    new Set(
+      data
+        .map((item) => item.category)
+        .filter((category) => category) // Remove null values
+        .flatMap((category) => category.split(",").map((cat) => cat.trim())) // Split multi-category strings
+    )
+  );
 
   const handleCheckboxChange = (e, setState) => {
     const { checked, value } = e.target;
-    setState((prev) =>
-      checked ? [...prev, value] : prev.filter((val) => val !== value)
-    );
+    setState(checked ? [value] : []); // Allow only one checkbox to be checked
   };
 
   return (
     <>
-      {categoryList?.map((item) => (
-        <div className="form-check" key={item.id}>
+      {uniqueCategories.map((category, index) => (
+        <div className="form-check" key={index}>
           <input
             className="form-check-input"
-            id={`brand${item.id}`}
+            id={`brand${index}`}
             type="checkbox"
-            checked={contract.includes(item.name)}
-            value={item.name}
+            checked={contract.includes(category)}
+            value={category}
             onChange={(e) => handleCheckboxChange(e, setContract)}
           />
-          <label className="form-check-label" htmlFor={`brand${item.id}`}>
-            {item.name
+          <label className="form-check-label" htmlFor={`brand${index}`}>
+            {category
               .split("-")
               .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(" ")}

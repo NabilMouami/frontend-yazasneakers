@@ -4,13 +4,13 @@ export default function Footer1() {
   return (
     <>
       <footer>
-        <div className="footer-area theme-bg pt-65">
+        <div className="footer-area theme-bg pt-25">
           <div className="container">
             <div className="main-footer pb-15 mb-30">
               <div className="row">
                 <div className="col-lg-3 col-md-4 col-sm-6">
                   <div className="footer-widget footer-col-1 mb-40">
-                    <div className="footer-logo mb-30">
+                    <div className="footer-logo">
                       <Link href="/">
                         <Image
                           src="/assets/img/logo/logo.webp"
@@ -22,34 +22,35 @@ export default function Footer1() {
                     </div>
                     <div className="footer-content">
                       <p>
-                        We offer only authentic product and our team of experts
-                        checks all our sneakers. All our employees are real
-                        sneaker fanatics! Are you one aswel? Have a look arround
-                        and let's sneak together! Ordered before 18:00 = Shipped
-                        today!
+                        Nous proposons uniquement des produits authentiques et
+                        notre équipe d'experts vérifie toutes nos baskets. Tous
+                        nos employés sont de véritables fanatiques de baskets !
+                        Vous en faites partie également ? Jetez un œil et
+                        essayons ensemble ! Commandé avant 18h00 = Expédié
+                        aujourd'hui !
                       </p>
                     </div>
                   </div>
                 </div>
+
                 <div className="col-lg-2 col-md-4 col-sm-6">
                   <div className="footer-widget footer-col-2 ml-30 mb-40">
-                    <h4 className="footer-widget__title mb-30">Information</h4>
+                    <h4 className="footer-widget__title mb-30">Lien Utiles</h4>
                     <div className="footer-widget__links">
                       <ul>
                         <li>
-                          <Link href="#">Custom Service</Link>
+                          <Link href="/on-sale">Sale</Link>
                         </li>
                         <li>
-                          <Link href="#">FAQs</Link>
+                          <Link href="/collections/accessoire">
+                            Accessoires
+                          </Link>
                         </li>
                         <li>
-                          <Link href="/track">Ordering Tracking</Link>
+                          <Link href="/collections/sneakers">Sneakers</Link>
                         </li>
                         <li>
-                          <Link href="/contact">Contacts</Link>
-                        </li>
-                        <li>
-                          <Link href="#">Events</Link>
+                          <Link href="/blog">Blog</Link>
                         </li>
                       </ul>
                     </div>
@@ -57,20 +58,28 @@ export default function Footer1() {
                 </div>
                 <div className="col-lg-2 col-md-4 col-sm-6">
                   <div className="footer-widget footer-col-3 mb-40">
-                    <h4 className="footer-widget__title mb-30">My Account</h4>
+                    <h4 className="footer-widget__title mb-30">
+                      Service Client
+                    </h4>
                     <div className="footer-widget__links">
                       <ul>
                         <li>
-                          <Link href="#">Delivery Information</Link>
+                          <Link href="/modes-de-paiement">
+                            Modes de paiement
+                          </Link>
                         </li>
                         <li>
-                          <Link href="#">Privacy Policy</Link>
+                          <Link href="/privacy-policy">Privacy Policy</Link>
                         </li>
                         <li>
-                          <Link href="#">Discount</Link>
+                          <Link href="/frais-de-livraison">
+                            Frais De Livraison
+                          </Link>
                         </li>
                         <li>
-                          <Link href="#">Custom Service</Link>
+                          <Link href="/livraison-et-retour">
+                            Politique d'échange
+                          </Link>
                         </li>
                         <li>
                           <Link href="#">Terms Condition</Link>
@@ -87,19 +96,29 @@ export default function Footer1() {
                     <div className="footer-widget__links">
                       <ul>
                         <li>
-                          <Link href="#">
+                          <Link
+                            href="https://www.facebook.com/yazasnkrz/"
+                            target="_blank"
+                          >
                             <i className="fab fa-facebook-f" />
                             Facebook
                           </Link>
                         </li>
+
                         <li>
-                          <Link href="#">
+                          <Link
+                            href="https://www.instagram.com/yaza_snkrz/"
+                            target="_blank"
+                          >
                             <i className="fab fa-instagram" />
                             Instagram
                           </Link>
                         </li>
                         <li>
-                          <Link href="#">
+                          <Link
+                            href="https://www.tiktok.com/@yaza_snkrz"
+                            target="_blank"
+                          >
                             <i className="fab fa-tiktok" />
                             TikTok
                           </Link>
@@ -110,10 +129,8 @@ export default function Footer1() {
                 </div>
                 <div className="col-lg-3 col-md-4">
                   <div className="footer-widget footer-col-5 mb-40">
-                    <h4 className="footer-widget__title mb-30">
-                      Get Newsletter
-                    </h4>
-                    <p>Get on the list and get 10% off your first order!</p>
+                    <h4 className="footer-widget__title mb-30">S'inscrire </h4>
+                    <p>Recevez nos offres et actualités par email</p>
                     <div className="footer-widget__newsletter">
                       <form action="#">
                         <input type="email" placeholder="Enter email address" />

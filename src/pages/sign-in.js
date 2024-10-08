@@ -3,6 +3,8 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -22,6 +24,7 @@ const MODE = {
   EMAIL_VERIFICATION: "EMAIL_VERIFICATION",
   VERIFICATION_OTP: "VERIFICATION_OTP",
 };
+
 export default function SignIn() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -30,6 +33,7 @@ export default function SignIn() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
 
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -41,53 +45,117 @@ export default function SignIn() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setMessage("");
+
+    // Trim input values based on mode
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    let trimmedFirstName = firstName.trim();
+    let trimmedLastName = lastName.trim();
+    let trimmedTelephone = telephone.trim();
+    let trimmedOtp = otp.trim();
 
     try {
       let response;
 
       switch (mode) {
         case MODE.LOGIN:
+          // Validate inputs
+          if (!trimmedEmail || !trimmedPassword) {
+            toast.error("Please fill in all required fields.");
+            setIsLoading(false);
+            return;
+          }
+
           response = await axios.post(`${config_url}/api/customers/login`, {
-            email,
-            password,
+            email: trimmedEmail,
+            password: trimmedPassword,
           });
-          Cookies.set("token", response.data.token);
-          console.log(response.data);
-          dispatch(loadCustomer(response.data.results));
-          router.push("/");
+
+          if (response.data && response.data.token) {
+            // Login successful
+            Cookies.set("token", response.data.token);
+            dispatch(loadCustomer(response.data.results));
+            toast.success("Logged in successfully!");
+            router.push("/"); // Navigate only after successful login
+          } else {
+            throw new Error("Invalid login credentials");
+          }
           break;
+
         case MODE.REGISTER:
+          // Validate inputs
+          if (
+            !trimmedFirstName ||
+            !trimmedLastName ||
+            !trimmedEmail ||
+            !trimmedTelephone ||
+            !trimmedPassword
+          ) {
+            toast.error("Please fill in all required fields.");
+            setIsLoading(false);
+            return;
+          }
+
           await axios.post(`${config_url}/api/customers`, {
-            firstName,
-            lastName,
-            email,
-            password,
+            firstName: trimmedFirstName,
+            lastName: trimmedLastName,
+            email: trimmedEmail,
+            telephone: trimmedTelephone,
+            password: trimmedPassword,
           });
-          setMessage("Registration successful! Please log in.");
+          toast.success("Registration successful! Please verify your OTP.");
           setMode(MODE.VERIFICATION_OTP); // Switch to OTP verification mode
           break;
+
         case MODE.VERIFICATION_OTP:
+          // Validate OTP
+          if (!trimmedOtp) {
+            toast.error("Please enter the OTP.");
+            setIsLoading(false);
+            return;
+          }
+
           await axios.post(`${config_url}/api/customers/verify-otp`, {
-            email,
-            otp, // Send OTP code for verification
+            email: trimmedEmail,
+            otp: trimmedOtp, // Send OTP code for verification
           });
-          setMessage("Verification successful! Please log in.");
+          toast.success("Verification successful! Please log in.");
           setMode(MODE.LOGIN); // Switch to login mode after verification
           break;
-        // Add other cases for password reset and email verification if needed
+
         default:
+          toast.error("Invalid mode.");
           break;
       }
     } catch (err) {
+      // Catching any errors, including failed login
       console.error(err);
+
+      // Set an error message
       setError("Something went wrong!");
+
+      // If you are using toast for error notifications
+      if (err.response && err.response.status === 401) {
+        toast.error("Invalid email or password. Please try again.");
+      } else if (
+        err.response &&
+        err.response.data &&
+        err.response.data.message
+      ) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Stop loading regardless of success or failure
     }
   };
 
   return (
     <>
+      <ToastContainer />
       <Layout headerStyle={3} footerStyle={1}>
         <section className="track-area pt-80 pb-40">
           <div className="container">
@@ -101,11 +169,11 @@ export default function SignIn() {
                     >
                       <div className="tptrack__item d-flex mb-20">
                         <div className="tptrack__item-content">
-                          <h4 className="tptrack__item-title">Login Here</h4>
+                          <h4 className="tptrack__item-title">Je Me Connect</h4>
                           <p>
-                            Your personal data will be used to support your
-                            experience throughout this website, to manage access
-                            to your account.
+                            Le plus souvent, je fais des achats dans la section:
+                            Nous choisirons les produits en fonction de vos
+                            besoins.
                           </p>
                         </div>
                       </div>
@@ -117,6 +185,7 @@ export default function SignIn() {
                           <input
                             type="email"
                             placeholder="Username / email address"
+                            value={email}
                             onChange={(e) => setEmail(e.target.value)}
                           />
                         </div>
@@ -127,39 +196,34 @@ export default function SignIn() {
                             <i className="fal fa-key" />
                           </span>
                           <input
-                            type="text"
+                            type="password"
                             placeholder="Password"
+                            value={password}
                             onChange={(e) => setPassword(e.target.value)}
                           />
                         </div>
                       </div>
-                      <div className="tpsign__remember d-flex align-items-center justify-content-between mb-15">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="flexCheckDefault"
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="flexCheckDefault"
-                          >
-                            Remember me
-                          </label>
-                        </div>
-                        <div className="tpsign__pass">
-                          <Link href="#">Forget Password</Link>
-                        </div>
-                      </div>
+
                       <div
                         className="tpsign__account"
                         onClick={() => setMode(MODE.REGISTER)}
+                        style={{
+                          cursor: "pointer",
+                          color: "black",
+                          marginLeft: "10px",
+                        }}
                       >
-                        Create New Account
+                        Créer un compte{" "}
                       </div>
                       <div className="tptrack__btn">
-                        <button className="tptrack__submition" type="submit">
-                          Login Now
+                        <button
+                          className="tptrack__submition"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading
+                            ? "Logging in..."
+                            : "Connectez-vous maintenant"}
                           <i className="fal fa-long-arrow-right" />
                         </button>
                       </div>
@@ -167,24 +231,69 @@ export default function SignIn() {
                   </div>
                 </div>
               )}
+
               {mode === MODE.VERIFICATION_OTP && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="h6">
-                    Entrez l'OTP envoyé à votre adresse e-mail
-                  </Typography>
-                  <OtpInput
-                    value={otp}
-                    onChange={setOtp}
-                    numInputs={6}
-                    renderSeparator={<span>-</span>}
-                    renderInput={(props) => (
-                      <input {...props} className="otp-input" />
-                    )}
-                  />
-                  <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-                    Vérifier l'OTP
-                  </Button>
-                </Box>
+                <div className="col-lg-6 col-sm-12">
+                  <div className="tptrack__product mb-40">
+                    <form
+                      className="tptrack__content grey-bg-3"
+                      onSubmit={handleSubmit}
+                    >
+                      <div className="tptrack__item d-flex mb-20">
+                        <div className="tptrack__item-content">
+                          <h4 className="tptrack__item-title">
+                            OTP Verification
+                          </h4>
+                          <p>
+                            Please enter the OTP sent to your email address.
+                          </p>
+                        </div>
+                      </div>
+                      <Box sx={{ mt: 2, mb: 2 }}>
+                        <OtpInput
+                          value={otp}
+                          onChange={setOtp}
+                          numInputs={6}
+                          renderSeparator={<span>-</span>}
+                          renderInput={(props) => (
+                            <input
+                              {...props}
+                              className="otp-input"
+                              style={{
+                                width: "2rem",
+                                height: "2rem",
+                                margin: "0 0.5rem",
+                                fontSize: "1rem",
+                                textAlign: "center",
+                              }}
+                            />
+                          )}
+                        />
+                      </Box>
+                      <div className="tptrack__btn">
+                        <button
+                          className="tptrack__submition"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Verifying..." : "Verify OTP"}
+                          <i className="fal fa-long-arrow-right" />
+                        </button>
+                      </div>
+                      <div
+                        className="tpsign__account mt-3"
+                        onClick={() => setMode(MODE.LOGIN)}
+                        style={{
+                          cursor: "pointer",
+                          color: "black",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        Back to Login
+                      </div>
+                    </form>
+                  </div>
+                </div>
               )}
 
               {mode === MODE.REGISTER && (
@@ -196,14 +305,19 @@ export default function SignIn() {
                     >
                       <div className="tptrack__item d-flex mb-20">
                         <div className="tptrack__item-icon">
-                          <img src="/assets/img/icon/sign-up.png" alt="" />
+                          <img
+                            src="/assets/img/icon/sign-up.png"
+                            alt="Sign Up Icon"
+                          />
                         </div>
                         <div className="tptrack__item-content">
-                          <h4 className="tptrack__item-title">Sign Up</h4>
+                          <h4 className="tptrack__item-title">
+                            Créer Un Compte Client
+                          </h4>
                           <p>
-                            Your personal data will be used to support your
-                            experience throughout this website, to manage access
-                            to your account.
+                            Créez un compte en 10 secondes.Vérifiez facilement
+                            l'historique des commandes.Achetez jusqu'à 2x plus
+                            vite
                           </p>
                         </div>
                       </div>
@@ -214,7 +328,8 @@ export default function SignIn() {
                           </span>
                           <input
                             type="text"
-                            placeholder="nom:"
+                            placeholder="Nom"
+                            value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                           />
                         </div>
@@ -226,7 +341,8 @@ export default function SignIn() {
                           </span>
                           <input
                             type="text"
-                            placeholder="prenom:"
+                            placeholder="Prenom"
+                            value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                           />
                         </div>
@@ -239,9 +355,22 @@ export default function SignIn() {
                           </span>
                           <input
                             type="email"
-                            defaultValue={email}
                             placeholder="Email address"
+                            value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="tptrack__id mb-10">
+                        <div className="form-sign">
+                          <span>
+                            <i className="fal fa-phone-alt" />
+                          </span>
+                          <input
+                            type="tel"
+                            placeholder="Numero Telephone"
+                            value={telephone}
+                            onChange={(e) => setTelephone(e.target.value)}
                           />
                         </div>
                       </div>
@@ -252,26 +381,34 @@ export default function SignIn() {
                           </span>
                           <input
                             type="password"
-                            defaultValue={password}
                             placeholder="Password"
+                            value={password}
                             onChange={(e) => setPassword(e.target.value)}
                           />
                         </div>
-                      </div>
-                      <div
-                        className="tpsign__account"
-                        onClick={() => setMode(MODE.LOGIN)}
-                      >
-                        Already Have Account?
                       </div>
                       <div className="tptrack__btn">
                         <button
                           className="tptrack__submition tpsign__reg"
                           type="submit"
+                          disabled={isLoading}
                         >
-                          Register Now
+                          {isLoading
+                            ? "Registering..."
+                            : "Inscrivez-vous maintenant"}
                           <i className="fal fa-long-arrow-right" />
                         </button>
+                      </div>
+                      <div
+                        className="tpsign__account mt-3"
+                        onClick={() => setMode(MODE.LOGIN)}
+                        style={{
+                          cursor: "pointer",
+                          color: "black",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        Vous avez déjà un compte ?{" "}
                       </div>
                     </form>
                   </div>

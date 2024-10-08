@@ -1,7 +1,6 @@
 import { store, persistor } from "@/features/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { Jost } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import "/public/assets/css/animate.css";
@@ -14,11 +13,6 @@ import "/public/assets/css/magnific-popup.css";
 import "/public/assets/css/meanmenu.css";
 import "/public/assets/css/spacing.css";
 import "/public/assets/css/main.css";
-const jost = Jost({
-  weight: ["300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--tp-ff-body",
-});
 
 const MyApp = ({ Component, pageProps }) => {
   return (

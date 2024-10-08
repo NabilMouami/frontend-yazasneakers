@@ -19,7 +19,6 @@ function CategoriesProduct({ initialData }) {
   const category = pathname.split("/")[2]; // Extracts category from the URL path
   console.log("Current Category:", category);
 
-  const { productList } = useSelector((state) => state.Products) || {};
   const [data, setData] = useState(initialData || []); // Set initialData from SSR
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(false); // Initial data already loaded from SSR
@@ -27,11 +26,14 @@ function CategoriesProduct({ initialData }) {
 
   const handleFilterChange = (filters) => {
     let filtered = [...data];
-
     if (filters.sizes.length > 0) {
       filtered = filtered.filter((product) => {
         const productSizes = JSON.parse(product.nemuro_shoes);
-        return filters.sizes.some((size) => productSizes.includes(size));
+
+        // Extract size numbers from filters.sizes (ignoring counts in parentheses)
+        const selectedSizes = filters.sizes.map((size) => size.split(" ")[0]);
+
+        return selectedSizes.some((size) => productSizes.includes(size));
       });
     }
 
@@ -97,7 +99,7 @@ function CategoriesProduct({ initialData }) {
   return (
     <Fragment>
       <Head>
-        <title>{`Shop ${category} Products | Your Store Name`}</title>
+        <title>{`Shop ${category} Products | At Yazasneaker Store`}</title>
         <meta
           name="description"
           content={`Browse our wide selection of ${category} products. Shop now for the best deals on ${category}.`}
@@ -110,10 +112,10 @@ function CategoriesProduct({ initialData }) {
         <meta property="og:image" content="https://your-image-url.com" />
         <meta
           property="og:url"
-          content={`https://your-site.com/produit/${category}`}
+          content={`https://your-site.com/collections/${category}`}
         />
       </Head>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop">
+      <Layout headerStyle={3} footerStyle={1}>
         <div className="meta-description-category">
           <div className="row">
             <div className="col-md-6 col-12 brand-description-meta">
@@ -124,7 +126,7 @@ function CategoriesProduct({ initialData }) {
             </div>
             <div className="col-md-6 col-12 brand-image-category">
               <img
-                src={`${config_url}/categories/${initialData[0]?.category_image}`}
+                src={initialData[0]?.category_image}
                 alt={initialData[0]?.meta_image}
               />
             </div>
@@ -135,14 +137,17 @@ function CategoriesProduct({ initialData }) {
             <div className="row">
               <div className="col-lg-2 col-md-12">
                 <div className="tpsidebar product-sidebar__product-category">
-                  <FilterSidebar onFilterChange={handleFilterChange} />
+                  <FilterSidebar
+                    onFilterChange={handleFilterChange}
+                    data={initialData}
+                  />
                 </div>
               </div>
 
               <div className="col-lg-10 col-md-12">
                 <div className="row row-cols-xxl-5 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
                   <FilterData
-                    showItem={5}
+                    showItem={20}
                     style={1}
                     showPagination
                     filterData={filteredJobs}

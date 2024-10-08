@@ -1,47 +1,29 @@
 import Link from "next/link";
-import Image from "next/image";
 import { config_url } from "@/util/config";
+
 export default function BlogCard1({ item }) {
+  // Function to format date to "MMM dd, yyyy"
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
+  };
+
   return (
     <>
       <article className="postbox__item format-image mb-60 transition-3">
         <div className="postbox__thumb w-img mb-25">
-          <Link href={`/blog/${item.id}`}>
-            <img
-              src={`${config_url}/blogs/${item.image}`}
-              alt={item.meta_image}
-            />
-          </Link>
+          <img src={item.image} alt={item.meta_image} />
         </div>
         <div className="postbox__content">
           <div className="postbox__meta mb-15">
             <span>
-              <Link href="#">
-                <i className="fal fa-user-alt" /> Alextina
-              </Link>
-            </span>
-            <span>
-              <i className="fal fa-clock" /> Dec 28, 2022
-            </span>
-            <span>
-              <Link href="#">
-                <i className="far fa-comment-alt" /> (04) Comments
-              </Link>
+              <i className="fal fa-clock" /> {formatDate(item.date_created)}
             </span>
           </div>
-          <h3 className="postbox__title mb-20">
-            <Link href={`/blog/${item.id}`}>{item.title}</Link>
-          </h3>
+          <h3 className="postbox__title mb-20">{item.title}</h3>
           <div className="postbox__text mb-30">
             <p>{item.description}</p>
-          </div>
-          <div className="postbox__read-more">
-            <Link
-              href={`/blog/${item.id}`}
-              className="tp-btn tp-color-btn banner-animation"
-            >
-              Reade More
-            </Link>
           </div>
         </div>
       </article>

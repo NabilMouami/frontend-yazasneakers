@@ -5,7 +5,7 @@ import { Fragment, useState, useEffect } from "react";
 import { config_url } from "@/util/config";
 import Preloader from "@/components/elements/Preloader";
 import FilterDataLatestArrival from "../shop/FilterDataLatestArrival";
-export default function LatestArrival() {
+export default function TopProducts() {
   const [data, setData] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function LatestArrival() {
 
   useEffect(() => {
     axios
-      .get(`${config_url}/api/products/release`)
+      .get(`${config_url}/api/products/top-products`)
       .then((res) => {
         setData(res.data);
         setFilteredJobs(res.data);
@@ -24,53 +24,7 @@ export default function LatestArrival() {
         setLoading(false);
       });
   }, []);
-  const handleFilterChange = (filters) => {
-    let filtered = [...data];
 
-    if (filters.sizes.length > 0) {
-      filtered = filtered.filter((product) => {
-        const productSizes = JSON.parse(product.nemuro_shoes);
-        return filters.sizes.some((size) => productSizes.includes(size));
-      });
-    }
-
-    if (filters.category.length > 0) {
-      filtered = filtered.filter((product) =>
-        filters.category.includes(product.category_names)
-      );
-    }
-    if (filters.genre.length > 0) {
-      console.log("Genre Filters:", filters.genre);
-
-      filtered = filtered.filter((product) => {
-        // Normalize genres by converting to lowercase
-        const productGenres = product.genre
-          .toLowerCase()
-          .split(",")
-          .map((g) => g.trim());
-        const filterGenres = filters.genre.map((g) => g.toLowerCase());
-
-        // Check if any of the product genres match the filter genres
-        const matches = productGenres.some((genre) =>
-          filterGenres.includes(genre)
-        );
-        console.log(
-          `Checking product ${product.id} with genres ${productGenres}: ${matches}`
-        );
-        return matches;
-      });
-
-      console.log("After Genre Filter:", filtered);
-    }
-
-    filtered = filtered.filter(
-      (product) =>
-        product.price >= filters.price[0] && product.price <= filters.price[1]
-    );
-    console.log("After Price Filter:", filtered);
-
-    setFilteredJobs(filtered);
-  };
   if (loading) return <Preloader />;
   if (error) return <div>Error: {error.message}</div>;
 
@@ -86,7 +40,6 @@ export default function LatestArrival() {
               <div className="col-lg-12 col-md-12">
                 <div className="row row-cols-xxl-6 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-2">
                   <FilterDataLatestArrival
-                    status="new"
                     showItem={4}
                     style={1}
                     //showPagination

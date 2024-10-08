@@ -1,7 +1,7 @@
 "use client";
 import Head from "next/head";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -10,10 +10,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { addCartWithSize } from "@/features/shopSlice";
 import { addWishlistWithSize } from "@/features/wishlistSlice";
 import Layout from "@/components/layout/Layout";
+import LikedProducts from "@/components/elements/LikedProducts";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 import Link from "next/link";
-import { Autoplay, Navigation, Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { toast } from "react-toastify";
+
 import "react-image-gallery/styles/css/image-gallery.css";
 const ReactImageGallery = dynamic(() => import("react-image-gallery"), {
   ssr: false,
@@ -24,38 +26,8 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import { config_url } from "@/util/config";
 import { loadDetailsProduct } from "@/features/productsSlice";
 import Image from "next/image";
-const swiperOptions = {
-  modules: [Autoplay, Pagination, Navigation],
-  slidesPerView: 5,
-  spaceBetween: 25,
-  autoplay: {
-    delay: 3500,
-  },
-  breakpoints: {
-    1400: {
-      slidesPerView: 5,
-    },
-    1200: {
-      slidesPerView: 5,
-    },
-    992: {
-      slidesPerView: 4,
-    },
-    768: {
-      slidesPerView: 2,
-    },
-    576: {
-      slidesPerView: 2,
-    },
-    0: {
-      slidesPerView: 1,
-    },
-  },
-  navigation: {
-    nextEl: ".tprelated__nxt",
-    prevEl: ".tprelated__prv",
-  },
-};
+import MoreCategories from "@/components/elements/MoreCategories";
+
 function DetailsProduct({ initialData, nameByFiltered }) {
   const { productList } = useSelector((state) => state.Products) || {};
   const { Details } = useSelector((state) => state.Products) || {};
@@ -66,8 +38,8 @@ function DetailsProduct({ initialData, nameByFiltered }) {
 
   const [listProdsGroup, setListProdsGroup] = useState([]);
   console.log(listProdsGroup);
-
   const [loading, setLoading] = useState(true);
+
   const [product, setProduct] = useState(initialData || {});
   const [category, setCategory] = useState("");
   console.log(category);
@@ -123,110 +95,188 @@ function DetailsProduct({ initialData, nameByFiltered }) {
     setSelectedSize(size);
     setSelected(false);
   };
-  const addToCart = (id, size) => {
-    if (Details?.nemuro_shoes) {
-      try {
-        const myArray = JSON.parse(Details.nemuro_shoes);
-        let size_final = size === null ? myArray[0] : size;
-        const item = productList?.find((item) => item.id === id);
-        const itemwithsize = { item, size: size_final };
-        console.log(itemwithsize);
-        dispatch(addCartWithSize({ product: itemwithsize }));
-      } catch (error) {
-        console.error("Failed to parse nemuro_shoes JSON:", error);
-      }
-    } else {
-      console.error("Details.nemuro_shoes is undefined or null");
-    }
-  };
-
-  const addToWishlist = (id, size) => {
-    if (Details?.nemuro_shoes) {
-      try {
-        const myArray = JSON.parse(Details.nemuro_shoes);
-        let size_final = size === null ? myArray[0] : size;
-        const item = productList?.find((item) => item.id === id);
-        const itemwithsize = { item, size: size_final };
-        dispatch(addWishlistWithSize({ product: itemwithsize }));
-      } catch (error) {
-        console.error("Failed to parse nemuro_shoes JSON:", error);
-      }
-    } else {
-      console.error("Details.nemuro_shoes is undefined or null");
-    }
-  };
-
   if (!Details) {
     return <div>Product not found</div>;
   }
+  let myQuantities = []; // Quantities array
 
   let myArray = [];
   if (Details?.nemuro_shoes) {
     try {
       myArray = JSON.parse(Details.nemuro_shoes);
+      myQuantities = JSON.parse(Details.qty);
     } catch (error) {
       console.error("Failed to parse nemuro_shoes JSON:", error);
     }
   }
+
+  const notify = (message) => toast.error(message);
+
+  const addToCart = (id, size) => {
+    let size_final;
+
+    if (size === null || myQuantities[myArray.indexOf(size)] === "0") {
+      // Find the first available size with quantity greater than 0
+      size_final =
+        myArray.find((s) => myQuantities[myArray.indexOf(s)] !== "0") || null; // Fallback to null if no size is available
+
+      if (!size_final) {
+        // Notify when no sizes are available
+        notify("No sizes available to add to the cart.");
+        return;
+      }
+    } else {
+      size_final = size; // Use the selected size if it's valid
+    }
+
+    const item_fil = productList?.find((item) => item.id === id);
+    const itemwithsize = { item: item_fil, size: size_final };
+    dispatch(addCartWithSize({ product: itemwithsize }));
+  };
+
+  const addToWishlist = (id, size) => {
+    let size_final;
+
+    if (size === null || myQuantities[myArray.indexOf(size)] === "0") {
+      // Find the first available size with quantity greater than 0
+      size_final =
+        myArray.find((s) => myQuantities[myArray.indexOf(s)] !== "0") || null; // Fallback to null if no size is available
+
+      if (!size_final) {
+        // Notify when no sizes are available
+        notify("No sizes available to add to the wishlist.");
+        return;
+      }
+    } else {
+      size_final = size; // Use the selected size if it's valid
+    }
+
+    const item_fil = productList?.find((item) => item.id === id);
+    const itemwithsize = { item: item_fil, size: size_final };
+    dispatch(addWishlistWithSize({ product: itemwithsize }));
+  };
 
   const imagesArray = Details?.images ? JSON.parse(Details.images) : [];
   const validImages = [Details?.image, ...imagesArray].filter((image) => image);
 
   const productDetailItem = {
     images: validImages.map((image) => ({
-      original: `${config_url}/images/${image}`,
-      thumbnail: `${config_url}/images/${image}`,
+      original: `${image}`,
+      thumbnail: `${image}`,
     })),
   };
 
-  const renderImage = useCallback(
-    (item) => (
-      <Zoom>
-        <Image
-          width={500}
-          height={500}
+  const renderImage = (item) => (
+    <Zoom>
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "auto",
+        }}
+      >
+        <img
+          style={{
+            width: "100%",
+            objectFit: "cover",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "auto",
+          }}
           src={item.original}
-          alt={item.description}
+          alt={item.meta_image}
         />
-      </Zoom>
-    ),
-    []
+      </div>
+    </Zoom>
+  );
+  const renderLeftNav = (onClick, disabled) => (
+    <button className="custom-left-nav" disabled={disabled} onClick={onClick}>
+      <FaChevronLeft />
+    </button>
   );
 
-  const renderButtons = useCallback(
-    (sizes) =>
-      sizes.map((number, index) => (
-        <button
-          key={number}
-          onClick={() => handleSelectedSize(number)}
-          className={`btn btn-sm ${
-            selectedSize === number || (selectedSize === null && index === 0)
-              ? "btn-dark text-white"
-              : "btn-outline-secondary"
-          }`}
-          style={{ borderRadius: "25px", padding: "0.25rem 0.75rem" }}
-        >
-          {number}
-        </button>
-      )),
-    [handleSelectedSize, selectedSize]
+  const renderRightNav = (onClick, disabled) => (
+    <button className="custom-right-nav" disabled={disabled} onClick={onClick}>
+      <FaChevronRight />
+    </button>
   );
+  const createButton = (size, index, qty, type) => {
+    if (type === 1) return null;
+
+    const isBlocked = qty === "0"; // Check if quantity is 0
+    const nextAvailableIndex = myArray.findIndex(
+      (s, i) => myQuantities[i] !== "0"
+    ); // Find the first available size index
+
+    return (
+      <button
+        key={size}
+        onClick={() => !isBlocked && handleSelectedSize(size)} // Disable click if blocked
+        className={`btn btn-sm ${
+          isBlocked
+            ? "btn-outline-secondary" // No background for blocked items
+            : selectedSize === size ||
+              (selectedSize === null && index === nextAvailableIndex)
+            ? "btn-dark text-white"
+            : "btn-outline-secondary"
+        }`}
+        style={{
+          borderRadius: "25px",
+          padding: "0.25rem 0.3rem",
+          fontSize: "0.7rem",
+          cursor: isBlocked ? "not-allowed" : "pointer", // Disable cursor if blocked
+          backgroundColor: isBlocked ? "" : "", // No background for blocked sizes
+          color: isBlocked ? "" : "", // No specific color for blocked sizes
+          textDecoration: isBlocked ? "line-through" : "none", // Add line-through if blocked
+        }}
+        disabled={isBlocked} // Disable button if qty is 0
+      >
+        {size}
+      </button>
+    );
+  };
+
+  const renderButtons = (sizes, qtys, type) => {
+    return sizes.map((size, index) =>
+      createButton(size, index, qtys[index], type)
+    );
+  };
 
   return (
     <>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop Details">
+      <Head>
+        <title>{`Shop ${Details.name} | At Yazasneakers Store`}</title>
+        <meta
+          name="description"
+          content={`Discover the features and benefits of ${Details.name}. Shop now for the best deals on ${Details.category_names} at Yazasneakers.`}
+        />
+        <meta property="og:title" content={`Shop  ${Details.name}`} />
+        <meta property="og:description" content={` ${Details.description}`} />
+        <meta
+          property="og:image"
+          content="https://your-image-url.com/{product-image}.jpg"
+        />
+        <meta
+          property="og:url"
+          content={`http://localhost:3000/produits/${Details.name}`}
+        />
+      </Head>
+
+      <Layout headerStyle={3} footerStyle={1}>
         <div>
-          <section className="product-area pt-80 pb-25">
+          <section className="product-area pt-40 pb-25">
             <div className="container">
               <div className="row">
                 <div className="col-lg-5 col-md-12">
-                  <div className="tpproduct-details__nab pr-60 mb-40">
+                  <div className="tpproduct-details__nab pr-10 mb-10">
                     <ReactImageGallery
                       showFullscreenButton={false}
                       showPlayButton={false}
                       renderItem={renderImage}
+                      renderLeftNav={renderLeftNav}
+                      renderRightNav={renderRightNav}
                       autoPlay={false}
-                      lazyLoad={true}
                       items={productDetailItem.images}
                     />
                   </div>
@@ -309,7 +359,7 @@ function DetailsProduct({ initialData, nameByFiltered }) {
                               <img
                                 width="80"
                                 height="80"
-                                src={`${config_url}/images/${product.image}`}
+                                src={product.image}
                                 alt={product.meta_image}
                                 className="rounded"
                                 layout="responsive"
@@ -329,7 +379,7 @@ function DetailsProduct({ initialData, nameByFiltered }) {
                         Sélectionnez la taille:
                       </div>
                       <div className="d-flex flex-wrap gap-2">
-                        {renderButtons(myArray)}
+                        {renderButtons(myArray, myQuantities, product.type)}
                       </div>
                     </div>
 
@@ -445,128 +495,18 @@ function DetailsProduct({ initialData, nameByFiltered }) {
 
           {/* product-details-area-end */}
           {/* related-product-area-start */}
-          <div className="related-product-area pt-65 pb-50 related-product-border">
-            <div className="container">
-              <div className="row align-items-center">
-                <div className="col-sm-6">
-                  <div className="tpsection mb-40">
-                    <h4 className="tpsection__title">Related Products</h4>
-                  </div>
-                </div>
-                <div className="col-sm-6">
-                  <div className="tprelated__arrow d-flex align-items-center justify-content-end mb-40">
-                    <div className="tprelated__prv">
-                      <i className="far fa-long-arrow-left" />
-                    </div>
-                    <div className="tprelated__nxt">
-                      <i className="far fa-long-arrow-right" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="swiper-container related-product-active">
-                <Swiper {...swiperOptions}>
-                  {productSimilaire?.map((item) => {
-                    const images = JSON.parse(item.images); // Parse the images string into an array
-                    const firstImage = images[0];
-                    const secondImage = images[1];
-
-                    return (
-                      <SwiperSlide key={item.id}>
-                        <div className="tpproduct pb-15 mb-30">
-                          <div className="tpproduct__thumb p-relative">
-                            <Link
-                              href={`/produits/${item.name_by_filtered}`}
-                              onClick={(e) => handleLinkClick(e, item)}
-                            >
-                              <Image
-                                width={300}
-                                height={300}
-                                src={`${config_url}/images/${firstImage}`}
-                                alt="product-thumb"
-                              />
-                              <Image
-                                width={300}
-                                height={300}
-                                className="product-thumb-secondary"
-                                src={`${config_url}/images/${secondImage}`}
-                                alt="product-thumb-secondary"
-                                layout="responsive"
-                                objectFit="contain" // or "cover" based on your preference
-                              />
-                            </Link>
-                            <div className="tpproduct__thumb-action">
-                              <a
-                                onClick={() => addToCart(item.id, selectedSize)}
-                                className="add-to-cart"
-                              >
-                                <i className="fal fa-shopping-basket" />
-                              </a>
-                              <Link
-                                href={`/produits/${item.name_by_filtered}`}
-                                onClick={(e) => handleLinkClick(e, item)}
-                              >
-                                <i className="fal fa-eye" />
-                              </Link>
-                              <a
-                                onClick={() =>
-                                  addToWishlist(item.id, selectedSize)
-                                }
-                                className="wishlist"
-                              >
-                                <i className="fal fa-heart" />
-                              </a>
-                            </div>
-
-                            <div className="tpproduct__content">
-                              <h3 className="tpproduct__title">
-                                <Link
-                                  href={`/produits/${item.name_by_filtered}`}
-                                  onClick={(e) => handleLinkClick(e, item)}
-                                >
-                                  {item.name}
-                                </Link>
-                              </h3>
-                              <div className="tpproduct__priceinfo p-relative">
-                                <div className="tpproduct__priceinfo-list">
-                                  {item.price_promo === 0 ? (
-                                    ""
-                                  ) : (
-                                    <span>{item.price_promo}.00Dh</span>
-                                  )}
-                                  {item.price_promo === 0 ? (
-                                    <span>{item.price}Dh</span>
-                                  ) : (
-                                    <del className="ml-10">
-                                      {item.price}.00Dh
-                                    </del>
-                                  )}
-                                </div>
-
-                                <div className="mb-2 p-2 d-flex flex-column gap-2 me-2">
-                                  <div className="row row-cols-4 row-cols-md-4 row-cols-lg-4 g-2">
-                                    {renderButtons(myArray)}
-                                  </div>
-                                </div>
-
-                                <div
-                                  className="tpproduct__cart"
-                                  onClick={() => addToCart(item.id)}
-                                >
-                                  <i className="fal fa-shopping-cart" />
-                                  Add To Cart
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </SwiperSlide>
-                    );
-                  })}
-                </Swiper>
-              </div>
-            </div>
-          </div>
+          <MoreCategories
+            category={category}
+            productSimilaire={productSimilaire}
+            addToCart={addToCart}
+            addToWishlist={addToWishlist}
+            handleLinkClick={handleLinkClick}
+          />
+          <LikedProducts
+            addToCart={addToCart}
+            addToWishlist={addToWishlist}
+            handleLinkClick={handleLinkClick}
+          />
         </div>
       </Layout>
     </>

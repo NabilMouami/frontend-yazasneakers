@@ -20,6 +20,7 @@ export default function Checkout() {
   const [newDate, setNewDate] = useState("");
   const [coinsPending, setCoinsPending] = useState(0);
   const [totalCoins, setTotalCoins] = useState(0);
+
   useEffect(() => {
     if (!customerInfo || !listOrders[0]) {
       setCoinsPending(0);
@@ -43,9 +44,15 @@ export default function Checkout() {
 
     setCoinsPending(pendingCoins);
 
-    // Calculate total coins by adding balance and pending coins
     const balance = listOrders[0]?.balance || 0;
-    setTotalCoins(balance + pendingCoins);
+
+    // Check if coins_pending equals balance
+    if (pendingCoins === balance) {
+      setTotalCoins(balance);
+    } else {
+      // Calculate total coins by adding balance and pending coins
+      setTotalCoins(balance + pendingCoins);
+    }
   }, [customerInfo, listOrders]);
 
   useEffect(() => {
@@ -86,7 +93,7 @@ export default function Checkout() {
 
   return (
     <Fragment>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Cart">
+      <Layout headerStyle={3} footerStyle={1}>
         <section
           className="cart-area pt-80 pb-80 wow fadeInUp"
           data-wow-duration=".8s"
@@ -98,7 +105,7 @@ export default function Checkout() {
                 {listOrders.length === 0 ? (
                   // Display "No orders made" when listOrders is empty
                   <div className="text-center">
-                    <h2>No orders made</h2>
+                    <h2>Aucune commande effectuée</h2>
                   </div>
                 ) : (
                   // Display table and order total information if listOrders is not empty
@@ -113,7 +120,6 @@ export default function Checkout() {
                             <th className="product-price">Prix ​​unitaire</th>
                             <th className="product-price">Date Order</th>
                             <th className="product-remove">Delivery Status</th>
-                            <th className="product-remove">Coins Payed</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -153,9 +159,6 @@ export default function Checkout() {
                                 </td>
                                 <td className="product-remove">
                                   {data.delivery_status}
-                                </td>
-                                <td className="product-remove">
-                                  {data.coins_payed}
                                 </td>
                               </tr>
                             );

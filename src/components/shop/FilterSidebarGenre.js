@@ -5,7 +5,7 @@ import CategoryLevel from "../filter/Categories";
 import SizeSidebar from "../filter/Size";
 import PriceRangeSlider from "../filter/PriceRangeSlider";
 
-const FilterSidebar = ({ onFilterChange, data }) => {
+const FilterSidebarGenre = ({ onFilterChange, data }) => {
   const [contract, setContract] = useState([]);
   const [genre, setGenre] = useState([]);
   const [sizes, setSizes] = useState([]);
@@ -69,12 +69,6 @@ const FilterSidebar = ({ onFilterChange, data }) => {
     <div className="product-sidebar">
       <div className="product-sidebar__widget mb-30">
         <div className="product-sidebar__info product-info-list">
-          <h4 className="product-sidebar__title mb-25">Genre:</h4>
-          <CategoryLevel genre={genre} setGenre={setGenre} />
-        </div>
-      </div>
-      <div className="product-sidebar__widget mb-30">
-        <div className="product-sidebar__info product-info-list">
           <h4 className="product-sidebar__title mb-25">Filter Price:</h4>
           <PriceRangeSlider handlePriceChange={handlePriceChange} data={data} />
         </div>
@@ -93,8 +87,18 @@ const FilterSidebar = ({ onFilterChange, data }) => {
           />
         </div>
       </div>
+      <div className="product-sidebar__widget mb-30">
+        <div className="product-sidebar__info product-info-list">
+          <h4 className="product-sidebar__title mb-25">Collections</h4>
+          <BrandLevel
+            data={data}
+            contract={contract}
+            setContract={setContract}
+          />
+        </div>
+      </div>
     </div>
   );
 };
 
-export default FilterSidebar;
+export default FilterSidebarGenre;

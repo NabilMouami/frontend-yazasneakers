@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+
 import Link from "next/link";
 import Image from "next/image";
 import { config_url } from "@/util/config";
@@ -41,15 +43,59 @@ const swiperOptions = {
 
 export default function WhiteProduct() {
   const { productList } = useSelector((state) => state.Products) || {};
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  const handleSelectedSize = (size) => {
+    setSelectedSize(size);
+  };
+  const createButton = (size, index, qty, type) => {
+    if (type === 1) return null; // Skip button rendering if type is 1
+
+    const isBlocked = qty === "0"; // Check if quantity is 0
+
+    return (
+      <button
+        key={size}
+        onClick={() => !isBlocked && handleSelectedSize(size)} // Disable click if blocked
+        className={`btn btn-sm ${
+          isBlocked
+            ? "btn-outline-secondary" // Default outline for blocked items
+            : selectedSize === size || (selectedSize === null && index === 0)
+            ? "btn-dark text-white" // Highlight the selected size or default to the first available
+            : "btn-outline-secondary"
+        }`}
+        style={{
+          borderRadius: "25px",
+          padding: "0.25rem 0.3rem",
+          fontSize: "0.7rem",
+          cursor: isBlocked ? "not-allowed" : "pointer", // Disable cursor if blocked
+          backgroundColor: isBlocked ? "black" : "", // Add blocked background color
+          color: isBlocked ? "red" : "", // Add blocked text color
+          textDecoration: isBlocked ? "line-through" : "none", // Add line-through if blocked
+        }}
+        disabled={isBlocked} // Disable button if qty is 0
+      >
+        {size}
+      </button>
+    );
+  };
+
+  const renderButtons = (sizes, qtys, type) => {
+    return sizes.map((size, index) =>
+      createButton(size, index, qtys[index], type)
+    );
+  };
 
   return (
     <>
-      <section className="white-product-area grey-bg-2 pt-65 pb-70 fix p-relative">
+      <section className="white-product-area grey-bg-2 pt-30 pb-30 fix p-relative">
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-sm-6 col-12">
-              <div className="tpsection mb-40">
-                <h4 className="tpsection__title">Dernières arrivées</h4>
+              <div className="tpsection mb-10">
+                <h4 className="tpsection__title">
+                  <Link href="on-sale">Sales</Link>{" "}
+                </h4>
               </div>
             </div>
             <div className="col-md-6 col-sm-6">
@@ -65,64 +111,82 @@ export default function WhiteProduct() {
               </div>
             </div>
           </div>
-          <div className="swiper-container product-active">
+          <div className="swiper-container related-product-active">
             <Swiper {...swiperOptions}>
-              {productList?.slice(1, 9).map((item) => (
-                <SwiperSlide key={item.id}>
-                  <div className="whiteproduct">
-                    <div className="whiteproduct__thumb">
-                      <Link href={`/produits/${item.name_by_filtered}`}>
-                        <Image
-                          src={`${config_url}/images/${item.image}`}
-                          alt="product-thumb"
-                          layout="responsive"
-                          width={300}
-                          height={300}
-                        />
-                      </Link>
-                    </div>
-                    <div className="whiteproduct__contentd-flex d-flex flex-column align-items-center justify-content-center">
-                      <div className="whiteproduct__text">
-                        <h5 className="whiteproduct__title">
-                          <Link href={`/shop-details/${item.id}`}>
-                            {item.name}
+              {productList
+                ?.filter((item) => item.price_promo !== 0)
+                .slice(1, 11)
+                .map((item) => {
+                  const images = JSON.parse(item.images); // Parse the images string into an array
+                  const secondImage = images[1];
+
+                  const myArray = JSON.parse(item.nemuro_shoes);
+                  const myQuantities = JSON.parse(item.qty); // Quantities array
+
+                  return (
+                    <SwiperSlide key={item.id}>
+                      <div className="tpproduct pb-15">
+                        <div className="tpproduct__thumb p-relative">
+                          <Link
+                            href={`/produits/${item.name_by_filtered}`}
+                            onClick={(e) => handleLinkClick(e, item)}
+                          >
+                            <Image
+                              width={500}
+                              height={500}
+                              className="product-thumb-secondary"
+                              src={secondImage}
+                              alt="product-thumb-secondary"
+                            />
+                            <Image
+                              width={300}
+                              height={300}
+                              src={item.image}
+                              alt="product-thumb"
+                            />
                           </Link>
-                        </h5>
-                        <div className="tpproduct__priceinfo p-relative w-100 d-flex flex-column align-items-center justify-content-center gap-2">
-                          {item.price_promo === 0 ? (
-                            ""
-                          ) : (
-                            <div className="tpproduct__ammount">
-                              <span>{item.price_promo}.00 Dh</span>
+
+                          <div className="tpproduct__content">
+                            <h3 className="tpproduct__title mt-20">
+                              <Link
+                                href={`/produits/${item.name_by_filtered}`}
+                                onClick={(e) => handleLinkClick(e, item)}
+                              >
+                                {item.name}
+                              </Link>
+                            </h3>
+                            <div className="tpproduct__priceinfo p-relative">
+                              <div className="tpproduct__priceinfo-list">
+                                {item.price_promo === 0 ? (
+                                  ""
+                                ) : (
+                                  <span>{item.price_promo}.00Dh</span>
+                                )}
+                                {item.price_promo === 0 ? (
+                                  <span>{item.price}Dh</span>
+                                ) : (
+                                  <del className="ml-10">{item.price}.00Dh</del>
+                                )}
+                              </div>
+
+                              <div className="mb-2 p-2 d-flex flex-column gap-2 me-2">
+                                <div className="row row-cols-4 row-cols-md-4 row-cols-lg-4 g-2">
+                                  {renderButtons(
+                                    myArray,
+                                    myQuantities,
+                                    item.type
+                                  )}{" "}
+                                </div>
+                              </div>
                             </div>
-                          )}
-                          {item.price_promo === 0 ? (
-                            <span className="fs-6">{item.price}Dh</span>
-                          ) : (
-                            <del className="dernierarrive-price-promo ml-4">
-                              {item.price}.00 Dh
-                            </del>
-                          )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </SwiperSlide>
-              ))}
+                    </SwiperSlide>
+                  );
+                })}
             </Swiper>
           </div>
-        </div>
-        <div className="banner-shape">
-          <img
-            src="/assets/img/banner/product-shape-01.png"
-            alt="shape"
-            className="banner-shape-primary"
-          />
-          <img
-            src="/assets/img/banner/product-shape-02.png"
-            alt="shape"
-            className="banner-shape-secondary"
-          />
         </div>
       </section>
     </>
